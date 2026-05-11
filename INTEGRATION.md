@@ -1,6 +1,6 @@
 # BambuserCalls-shopper — Integration guide
 
-A practical walkthrough of every public function the package exposes and what a host app needs to do to actually wire each one up. Read alongside [`README.md`](README.md), which has the quick-start summary.
+A practical walkthrough of every public function the package exposes and what a host app needs to do to wire each one up. Read alongside [`README.md`](README.md), which has the quick-start summary.
 
 ---
 
@@ -15,13 +15,13 @@ A practical walkthrough of every public function the package exposes and what a 
    - [`BambuserCallController`](#bambusercallcontroller)
    - [`BambuserCallOverlay`](#bambusercalloverlay)
    - [`BambuserCallDelegate`](#bambusercalldelegate)
+   - [`BambuserCallEvent`](#bambusercallevent)
+   - [`BambuserCallError`](#bambusercallerror)
    - [Enums](#enums)
-   - [Product-hydration models](#product-hydration-models)
 6. [Implementation checklist](#implementation-checklist)
-7. [Product hydration in detail](#product-hydration-in-detail)
-8. [Cart integration in detail](#cart-integration-in-detail)
-9. [PiP customization](#pip-customization)
-10. [Common pitfalls](#common-pitfalls)
+7. [Cart integration in detail](#cart-integration-in-detail)
+8. [PiP customization](#pip-customization)
+9. [Common pitfalls](#common-pitfalls)
 
 ---
 
@@ -31,9 +31,9 @@ It hides three things behind a small SwiftUI surface:
 
 - A `WKWebView` that loads the Bambuser one-to-one embed script and grants camera/mic permissions automatically.
 - A draggable picture-in-picture overlay that resizes itself between a slim ringing strip and a full mini-player as the SDK reports viewport-mode changes.
-- A two-way JS bridge that converts SDK events into Swift delegate callbacks and lets you push product/cart updates back into the embed.
+- A two-way JS bridge that turns SDK events into Swift delegate callbacks and lets you push notifications back into the embed.
 
-You implement a delegate to bridge the bridge to your app's navigation stack, catalog, and cart.
+You implement a two-method delegate to bridge the bridge to your app's navigation stack and cart.
 
 ---
 
@@ -97,7 +97,7 @@ struct MyApp: App {
 Two things to note:
 
 - `BambuserCallController.delegate` is `weak`. The app must keep a strong reference (a `@State` property is the simplest place).
-- `BambuserCallOverlay` belongs in a ZStack/overlay above your main UI so the floating PiP sits on top of everything else.
+- `BambuserCallOverlay` belongs above your main UI so the floating PiP sits on top of everything else.
 
 To start a session from anywhere:
 
@@ -115,10 +115,7 @@ Button("Talk to expert") {
 
 ### `BambuserCallConfiguration`
 
-Frozen at init. Only `orgId` is required. The public surface is intentionally
-small — six knobs that hosts realistically flip — and everything else (embed
-triggers, navigation/fill modes, ringing-strip size, animation curves, custom
-user agent, getUserMedia polyfill) lives as internal-only defaults.
+Frozen at init. Only `orgId` is required. The public surface intentionally exposes only the six knobs hosts realistically flip; embed triggers, navigation/fill modes, ringing-strip size, animation curve, custom user agent, and the legacy media-shim flag all live as internal defaults.
 
 ```swift
 public struct BambuserCallConfiguration {
@@ -144,14 +141,10 @@ What each one does:
 
 - **`orgId`** — Bambuser organization id, hardcoded into the JS embed call.
 - **`embedUrl`** — embed script URL. Override for staging / labs / branch builds.
-- **`floatingPipSize`** — frame for the connected mini-player (full video tile + controls). The package handles the smaller ringing-strip size internally.
-- **`isInspectable`** — whether `WKWebView.isInspectable` is true. Default leaves Safari Web Inspector on in DEBUG and off in release so production builds aren't debuggable.
-- **`autoExpandOnConnect`** — if the user minimized to PiP during the connecting phase, the framework restores full-screen the moment the call goes live.
-- **`dismissOnCallEnd`** — when set, the overlay closes itself the moment the SDK reports `call-ended` (and friends).
-
-If you genuinely need to override one of the internal knobs (e.g. a different
-trigger set, custom user agent, no-tab-bar layout), file an issue — it usually
-means we should promote it to the public API rather than have you reach in.
+- **`floatingPipSize`** — frame for the connected mini-player. The smaller ringing-strip size is handled internally.
+- **`isInspectable`** — whether `WKWebView.isInspectable` is true. DEBUG-on, release-off by default.
+- **`autoExpandOnConnect`** — if the user minimized to PiP during the connecting phase, the overlay auto-restores full-screen the moment the call goes live.
+- **`dismissOnCallEnd`** — when true (default), the overlay closes itself the moment the SDK reports `call-ended` and friends.
 
 ### `BambuserCallController`
 
@@ -165,7 +158,7 @@ public init(configuration: BambuserCallConfiguration)
 
 Hold the controller as `@StateObject` at app root and inject via `.environmentObject(...)`.
 
-#### Published state — observe with SwiftUI
+#### Published state
 
 ```swift
 @Published public private(set) var isVisible: Bool
@@ -178,7 +171,7 @@ public weak var delegate: (any BambuserCallDelegate)?    // assign at startup
 public var isCallActive: Bool { get }                    // .connecting OR .connected
 ```
 
-#### Lifecycle methods — call from your UI
+#### Lifecycle methods
 
 ```swift
 public func show(orgId: String? = nil, embedUrl: URL? = nil)
@@ -187,72 +180,84 @@ public func expand()
 public func enterPiP(presentation: PipPresentation = .floating)
 ```
 
-- **`show()`** — opens the overlay full-screen. Uses `configuration.orgId` unless you pass an override (multi-tenant apps).
-- **`close()`** — fully tears down the embed and resets all state to idle. Called automatically at call-end if `dismissOnCallEnd` is true.
+- **`show()`** — opens the overlay full-screen. Uses `configuration.orgId` unless you pass an override.
+- **`close()`** — fully tears down the embed and resets all state to idle. Called automatically at call-end if `dismissOnCallEnd` is true, and on every `close` event from the embed.
 - **`expand()` / `enterPiP()`** — manual presentation control. The SDK itself flips between full and floating based on user actions, but exposing these lets you script overlays from buttons elsewhere in the app.
 
-#### Outbound bridge — push state into the embed
+#### Outbound bridge
 
 ```swift
 public func notifyProductNavigation(externalId: String)
-public func hydrateProduct(bambuserId: String, payload: BambuserHydratedProduct)
+public func notify(callbackKey: String, info: Any)
 ```
 
-- **`notifyProductNavigation`** — call this whenever the user navigates to a product *outside* the embed (taps a card on a different tab, follows a deep link, etc.). The embed's product carousel mirrors the new selection. Gated on `isCallActive` so it's safe to fire-and-forget.
-- **`hydrateProduct`** — manual hydration entry point. Hosts normally don't call this directly; the framework calls it on your behalf with whatever your delegate returns from `bambuserCall(_:provideProductData:completion:)`.
+- **`notifyProductNavigation(externalId:)`** — call whenever the user navigates to a product *outside* the embed (taps a card on a different tab, follows a deep link, etc.). The embed's product carousel mirrors the new selection. Gated on `isCallActive`, safe to fire-and-forget.
+- **`notify(callbackKey:info:)`** — invoke `window[callbackKey](info)` on the JS side. Primary use is resolving the cart-add and cart-update callbacks the embed hands you via `BambuserCallEvent.shouldAddToCart` / `.shouldUpdateCart`. `info` is interpolated verbatim — pass `true`, `42`, `"'string'"`, or `"{ id: 1 }"` (a JS literal as a Swift string).
 
 ### `BambuserCallOverlay`
 
-`public struct BambuserCallOverlay: View`
-
 ```swift
-public init(controller: BambuserCallController)
+public struct BambuserCallOverlay: View {
+    public init(controller: BambuserCallController)
+}
 ```
 
-Place exactly one in your view tree, either via `.overlay(...)` on the root or as a sibling in a `ZStack`. Renders nothing while the controller is hidden, so it has no ambient cost when you're not in a call.
+Place exactly one in your view tree (typically as `.overlay(...)` on the root or as a sibling in a `ZStack`). Renders nothing while the controller is hidden, so it has no ambient cost when you're not in a call.
 
 ### `BambuserCallDelegate`
 
-`@MainActor public protocol BambuserCallDelegate: AnyObject`
-
-Almost every method has a default implementation. The minimum a host has to implement is the navigation request:
+Two methods total. The delegate is `@MainActor`.
 
 ```swift
-func bambuserCall(
-    _ controller: BambuserCallController,
-    didRequestNavigationTo externalId: String
-)
+@MainActor
+public protocol BambuserCallDelegate: AnyObject {
+    func bambuserCall(_ controller: BambuserCallController, didEmit event: BambuserCallEvent)
+    func bambuserCall(_ controller: BambuserCallController, didEncounterError error: BambuserCallError)
+}
 ```
 
-Optional methods (with default empty/false implementations):
+`didEncounterError` has an empty default — host implements it only if they want to log/handle errors. `didEmit` is required (no default).
+
+### `BambuserCallEvent`
+
+Every interesting thing the framework wants to tell the host arrives here:
 
 ```swift
-// Lifecycle
-func bambuserCallDidRequestClose(_ controller: BambuserCallController)
-func bambuserCallDidRequestCheckout(_ controller: BambuserCallController)
-func bambuserCall(_ controller: BambuserCallController, didChangeCallState state: CallState)
-func bambuserCall(_ controller: BambuserCallController, didChangePresentation isPiP: Bool, presentation: PipPresentation)
-
-// Cart (default returns false for both)
-func bambuserCall(_ controller: BambuserCallController,
-                  shouldAddToCart sku: String,
-                  quantity: Int,
-                  completion: @escaping (Bool) -> Void)
-func bambuserCall(_ controller: BambuserCallController,
-                  shouldUpdateCartItem sku: String,
-                  quantity: Int,
-                  completion: @escaping (Bool) -> Void)
-
-// Hydration (default returns empty dict)
-func bambuserCall(_ controller: BambuserCallController,
-                  provideProductData references: [BambuserCallProductReference],
-                  completion: @escaping ([String: BambuserHydratedProduct]) -> Void)
-
-// Catch-all observer
-func bambuserCall(_ controller: BambuserCallController,
-                  didReceiveEvent name: String,
-                  payload: Any?)
+public enum BambuserCallEvent {
+    case navigateTo(externalId: String)
+    case close
+    case checkout(cart: [String: Any]?)
+    case callStateChanged(CallState)
+    case presentationChanged(isPiP: Bool, presentation: PipPresentation)
+    case shouldAddToCart(sku: String, quantity: Int, callbackKey: String)
+    case shouldUpdateCart(sku: String, quantity: Int, callbackKey: String)
+    case other(name: String, payload: Any?)
+}
 ```
+
+Per-case meaning:
+
+| Case | When | Notes |
+|---|---|---|
+| `.navigateTo(externalId:)` | Embed product click | `externalId` is already unwrapped from its three possible shapes (string, `{id, feedId}` dict, URL slug). |
+| `.close` | Embed close event | Overlay has already been dismissed by the framework — case is purely for observation. |
+| `.checkout(cart:)` | Embed `goto-checkout` event | Cart payload is whatever the embed posted (typically `{ items: [...] }`). |
+| `.callStateChanged(_)` | Call lifecycle transition | Fires once per change. |
+| `.presentationChanged(...)` | PiP enter/exit/resize | `presentation` only meaningful when `isPiP` is true. |
+| `.shouldAddToCart(...)` | Embed cart-add | Host must reply via `controller.notify(callbackKey: callbackKey, info: ...)`. |
+| `.shouldUpdateCart(...)` | Embed cart-update | Same callback contract as `.shouldAddToCart`. |
+| `.other(name:payload:)` | Anything the SDK doesn't model explicitly | Forward-compat hook and analytics piggyback point. |
+
+### `BambuserCallError`
+
+```swift
+public enum BambuserCallError: Error {
+    case javaScriptEvaluationFailed(operation: String, underlying: Error)
+    case invalidEventPayload(eventName: String, reason: String)
+}
+```
+
+`javaScriptEvaluationFailed` fires when a `notifyProductNavigation` or `notify` call to the WebView fails. `invalidEventPayload` fires when the router can't parse an incoming event — the event is dropped instead of emitted in a malformed form.
 
 ### Enums
 
@@ -267,273 +272,62 @@ public enum PipPresentation: Equatable, Sendable {
 }
 ```
 
-### Product-hydration models
-
-Mirror the shape of the [Bambuser fluent product builder](https://bambuser.com/docs/video-consultation/provide-product-data/). All `Encodable + Sendable`.
-
-```swift
-public struct BambuserCallProductReference: Equatable, Sendable {
-    public let bambuserId: String              // pass back to updateProduct
-    public let ref: String                     // map to YOUR catalog
-    public let referenceType: ReferenceType    // url / productReference / scannedCode / unknown
-}
-
-public struct BambuserHydratedProduct: Encodable, Sendable {
-    public var currency: String                // "USD"
-    public var locale: String                  // "en-US"
-    public var product: BambuserProductDetails
-}
-
-public struct BambuserProductDetails: Encodable, Sendable {
-    public var name: String?
-    public var subtitle: String?
-    public var description: String?
-    public var url: String?
-    public var sku: String?
-    public var attributes: [BambuserAttribute]?
-    public var variations: [BambuserVariation]?
-    public var defaultVariationIndex: Int?
-    public var rating: BambuserRating?
-}
-
-public struct BambuserAttribute: Encodable, Sendable {
-    public var id: String                      // "color", "size", …
-    public var displayName: String?
-    public var options: [Option]
-    public struct Option: Encodable, Sendable {
-        public var id: String                  // "red", "small", …
-        public var displayName: String?
-    }
-}
-
-public struct BambuserVariation: Encodable, Sendable {
-    public var name: String
-    public var sku: String
-    public var imageUrls: [String]
-    public var subtitle: String?
-    public var url: String?
-    public var inStock: Bool?
-    public var price: BambuserPrice?
-    public var attributes: [String: String]?   // attributeId → optionId
-}
-
-public struct BambuserPrice: Encodable, Sendable {
-    public var current: Double
-    public var original: Double?
-}
-
-public struct BambuserRating: Encodable, Sendable {
-    public var rating: Double
-    public var maxValue: Double                // default 5
-    public var numberOfRatings: Int?
-}
-```
-
 ---
 
 ## Implementation checklist
 
-For each entry: what already exists in the package, and what you have to write in your host app.
+What's in the package vs. what your host has to write.
 
-### 1. Show / dismiss the overlay
-
-**In package:** `controller.show()`, `controller.close()`, `BambuserCallOverlay` view.
-
-**You need to:** Pick where to call `show()` (a "Talk to expert" button on a product page is typical) and place the overlay in your view tree.
-
-### 2. Receive product clicks from the embed
-
-**In package:** Parses `navigate-to` forwarded events, unwraps `externalId` from the three shapes (string, `{id, feedId}` dict, URL slug fallback), calls `delegate.bambuserCall(_:didRequestNavigationTo:)`.
-
-**You need to:** Implement `didRequestNavigationTo`, map the externalId to your product schema, push your detail screen. Optionally call `controller.notifyProductNavigation(externalId:)` to confirm you navigated.
-
-### 3. Send product clicks to the embed
-
-**In package:** `controller.notifyProductNavigation(externalId:)` (gated on `isCallActive`).
-
-**You need to:** Wire this into your existing product detail screen's `onAppear` / size-selection change handlers so the embed's carousel stays in sync.
-
-### 4. Hydrate products on demand
-
-**In package:** Listens for `provide-product-data`, parses the references, calls `delegate.bambuserCall(_:provideProductData:completion:)`. After your completion fires, the framework JSON-encodes each entry and applies it to the embed's fluent product builder via JS.
-
-**You need to:** Implement the hydration delegate method, look up your catalog, return a `[bambuserId: BambuserHydratedProduct]` dictionary. See [Product hydration in detail](#product-hydration-in-detail) for the mapping recipe.
-
-### 5. Cart add / update
-
-**In package:** Listens for `should-add-item-to-cart` / `should-update-item-in-cart`, extracts SKU + quantity from common payload shapes, hands them to your delegate with a completion handler. Resolves the embed-side promise via `controller.resolveCart(...)` once your completion fires.
-
-**You need to:** Implement the two cart delegate methods, do the actual cart mutation, call the completion with `true` on success or `false` on failure (e.g. out of stock).
-
-### 6. Checkout
-
-**In package:** Listens for `goto-checkout`, calls `delegate.bambuserCallDidRequestCheckout(_)`.
-
-**You need to:** Implement the method to switch to your cart screen / present checkout.
-
-### 7. Call lifecycle observation
-
-**In package:** Maps the embed's various call-* event names onto a unified `CallState`. Auto-expands from PiP on first connect if `autoExpandOnConnect` is true. Auto-closes the overlay on `call-ended` if `dismissOnCallEnd` is true.
-
-**You need to:** Optionally implement `didChangeCallState` for analytics, custom UI feedback, etc.
-
-### 8. PiP placement / drag
-
-**In package:** Drag-to-move with cumulative offset, auto-resize between `minimizedPipSize` (ringing) and `floatingPipSize` (connected), bottom-right resting position with safe-area + tab-bar insets.
-
-**You need to:** Just configure the sizes. If your app's bottom chrome differs from the standard 49pt tab bar, set `bottomReserve`.
-
-### 9. Catch-all observer
-
-**In package:** All embed events that aren't routed to specific delegate methods (and a few that are) are also delivered via `bambuserCall(_:didReceiveEvent:payload:)`.
-
-**You need to:** Use this for analytics piggybacks, debugging, or future events the framework hasn't explicitly modelled yet. Default impl is a no-op.
-
----
-
-## Product hydration in detail
-
-When the embed asks for product data (the agent typed a SKU / URL / scanned a barcode), the flow is:
-
-1. JS emits `provide-product-data` with one or more references.
-2. Framework parses them into `[BambuserCallProductReference]` and calls your delegate.
-3. Your delegate fetches data (sync or async — the completion is held open) and calls `completion(dict)`.
-4. Framework iterates the dict and runs `controller.hydrateProduct(bambuserId:payload:)` for each entry.
-5. JS bridge applies the JSON onto the SDK's fluent product builder via `oneToOneEmbed.updateProduct(...)`.
-
-### Minimum viable hydration
-
-For a single-variation product:
-
-```swift
-func bambuserCall(
-    _ controller: BambuserCallController,
-    provideProductData references: [BambuserCallProductReference],
-    completion: @escaping ([String: BambuserHydratedProduct]) -> Void
-) {
-    var hydrated: [String: BambuserHydratedProduct] = [:]
-    for ref in references {
-        guard let product = catalog.lookup(ref.ref) else { continue }
-        hydrated[ref.bambuserId] = BambuserHydratedProduct(
-            currency: "USD",
-            locale: "en-US",
-            product: BambuserProductDetails(
-                name: product.name,
-                description: product.description,
-                sku: product.sku,
-                variations: [
-                    BambuserVariation(
-                        name: product.name,
-                        sku: product.sku,
-                        imageUrls: product.imageUrls.map { $0.absoluteString },
-                        inStock: product.inStock,
-                        price: BambuserPrice(current: product.price)
-                    )
-                ]
-            )
-        )
-    }
-    completion(hydrated)
-}
-```
-
-### Multi-variation with attributes
-
-If your product has color and size dimensions, declare them at the parent level and reference them from each variation:
-
-```swift
-let attributes: [BambuserAttribute] = [
-    BambuserAttribute(id: "color", displayName: "Color", options: [
-        .init(id: "red",   displayName: "Red"),
-        .init(id: "blue",  displayName: "Blue")
-    ]),
-    BambuserAttribute(id: "size", displayName: "Size", options: [
-        .init(id: "s", displayName: "S"),
-        .init(id: "m", displayName: "M"),
-        .init(id: "l", displayName: "L")
-    ])
-]
-
-let variations: [BambuserVariation] = [
-    BambuserVariation(
-        name: "Red, Small",
-        sku: "shirt-red-s",
-        imageUrls: ["https://…/red.jpg"],
-        inStock: true,
-        price: BambuserPrice(current: 49.99),
-        attributes: ["color": "red", "size": "s"]
-    ),
-    // … one per concrete combination
-]
-
-let hydrated = BambuserHydratedProduct(
-    currency: "USD",
-    locale: "en-US",
-    product: BambuserProductDetails(
-        name: "Linen shirt",
-        description: "100% premium linen.",
-        sku: "shirt",
-        attributes: attributes,
-        variations: variations
-    )
-)
-```
-
-### Async hydration
-
-The completion can fire later — e.g. from a network call:
-
-```swift
-Task {
-    var hydrated: [String: BambuserHydratedProduct] = [:]
-    for ref in references {
-        if let product = await api.fetchProduct(ref: ref.ref) {
-            hydrated[ref.bambuserId] = product.toBambuserHydrated()
-        }
-    }
-    completion(hydrated)
-}
-```
-
-The embed will hold the agent's product slot in a loading state until you reply.
+| Step | Where it lives |
+|---|---|
+| Add Info.plist camera + microphone usage strings. | Host |
+| Construct `BambuserCallController` at app root. | Host (≈5 lines) |
+| Place `BambuserCallOverlay` in the root view tree. | Host (1 line) |
+| Implement `BambuserCallDelegate.bambuserCall(_:didEmit:)`. | Host (required) |
+| Handle `.navigateTo` — push your product detail screen. | Host |
+| Handle `.checkout` — switch to your cart screen. | Host |
+| Handle `.shouldAddToCart` / `.shouldUpdateCart` — mutate cart, reply via `controller.notify(callbackKey:info:)`. | Host |
+| Optionally implement `bambuserCall(_:didEncounterError:)` for logging. | Host (optional) |
+| Optionally call `notifyProductNavigation` when user navigates outside chat. | Host (≈2 lines) |
+| PiP placement, drag, resize, lifecycle. | Package — automatic |
+| Auto-grant camera/mic, browser-detection UA, JS bridge. | Package — automatic |
+| Auto-dismiss on call-end / auto-expand on connect. | Package — flag-driven |
+| Diagnostic emoji logs for cart and checkout payloads. | Package — automatic |
 
 ---
 
 ## Cart integration in detail
 
-Both cart events deliver a SKU + quantity + a completion handler. Your job is to mutate your real cart and reply.
+When the embed needs to add or update an item in the cart, the framework hands you a `BambuserCallEvent.shouldAddToCart(sku:quantity:callbackKey:)` (or the `.shouldUpdateCart` variant). You mutate your real cart and then resolve the JS-side promise via `controller.notify(callbackKey:info:)`.
 
 ```swift
-func bambuserCall(
-    _ controller: BambuserCallController,
-    shouldAddToCart sku: String,
-    quantity: Int,
-    completion: @escaping (Bool) -> Void
-) {
+case let .shouldAddToCart(sku, quantity, callbackKey),
+     let .shouldUpdateCart(sku, quantity, callbackKey):
     Task {
         do {
             try await cartService.add(sku: sku, quantity: quantity)
-            completion(true)
+            controller.notify(callbackKey: callbackKey, info: true)
         } catch {
-            completion(false)   // embed shows "couldn't add" UI to the agent
+            controller.notify(
+                callbackKey: callbackKey,
+                info: "{ success: false, reason: 'out-of-stock' }"
+            )
         }
     }
-}
-
-func bambuserCall(
-    _ controller: BambuserCallController,
-    shouldUpdateCartItem sku: String,
-    quantity: Int,
-    completion: @escaping (Bool) -> Void
-) {
-    Task {
-        let success = await cartService.update(sku: sku, quantity: quantity)
-        completion(success)
-    }
-}
 ```
 
-Replying with `false` tells the agent the action failed (out of stock, validation error, etc.). The embed surfaces a generic failure message; if you need a custom reason string, plumb it through your own catch-all delegate implementation and log/handle it there.
+`info` is interpolated verbatim into `window[callbackKey](info)`. Pass `true` for success, or a Swift string containing a JS object literal for a richer failure reason.
+
+The framework also logs the incoming events to the console:
+
+```
+🛒 [BambuserCall] should-add-item-to-cart raw payload: { … }
+🛒 [BambuserCall] should-add-item-to-cart sku=1232 quantity=1 callbackKey=cb_1
+🔄 [BambuserCall] should-update-item-in-cart sku=1232 quantity=2 callbackKey=cb_2
+💳 [BambuserCall] goto-checkout payload: { items: [...] }
+```
+
+Useful for verifying the embed-side shape matches what your delegate parses.
 
 ---
 
@@ -548,11 +342,7 @@ BambuserCallConfiguration(
 )
 ```
 
-That's the only PiP knob exposed publicly. The framework picks the right
-size for the dial-up ringing strip internally and parks the floater bottom-
-right with safe-area + tab-bar margins. Users can drag it anywhere from there;
-drag offset resets each time PiP is re-entered so every session starts at the
-resting position.
+That's the only PiP knob exposed publicly. The framework picks the right size for the dial-up ringing strip internally and parks the floater bottom-right with safe-area + tab-bar margins. Users can drag it anywhere from there; drag offset resets each time PiP is re-entered so every session starts at the resting position.
 
 To programmatically open in PiP:
 
@@ -565,27 +355,19 @@ bambuserCall.enterPiP(.floating) // immediately goes to PiP
 
 ## Common pitfalls
 
-**Delegate stays nil because nothing keeps it alive.**
-`BambuserCallController.delegate` is `weak`. Hold it strongly somewhere — typically a `@State` property at app root. The bootstrap example above shows the pattern.
+**Delegate held weakly.** `BambuserCallController.delegate` is `weak`. Keep a strong reference at app root or it will silently deallocate.
 
-**`isCallActive` is false when you expected it to be true.**
-The framework only flips `callState` when the embed emits one of the recognized lifecycle event names. If your SDK build emits something else (a custom rename), implement `didReceiveEvent` and call `controller.setCallState(.connecting/.connected)` manually — but file a bug first; we should expand the recognized list.
+**`isCallActive` is false when you expected it to be true.** The framework only flips `callState` when the embed emits one of the recognized lifecycle event names. If your SDK build emits something else, observe the `.other` case in `didEmit` for visibility, and file a bug so we can expand the recognized list.
 
-**Embed lists won't scroll inside the PiP.**
-Drag-to-move only intercepts touches when `controller.isPiP` is true. If you experience the issue in *full-screen* mode, double-check you didn't disable hit-testing on the overlay or wrap it in a gesture-stealing container.
+**Embed lists won't scroll inside the PiP.** Drag-to-move only intercepts touches when `controller.isPiP` is true. If you experience the issue in *full-screen* mode, double-check you didn't wrap the overlay in a gesture-stealing container.
 
-**`provide-product-data` completion never fires.**
-The framework holds the JS-side promise until your `completion` closure runs. Make sure every code path in your delegate calls `completion(dict)` — even for the empty case (`completion([:])`).
+**Cart event completion never resolves on the JS side.** The embed holds the cart UI in a loading state until you call `controller.notify(callbackKey: callbackKey, info: ...)` with the key from the event. Forgetting that call leaves the embed spinning.
 
-**Calling `notifyProductNavigation` from a screen the user reached without an active call does nothing.**
-This is intentional — `isCallActive` gates the JS bridge so we don't spam the embed when no expert is watching. Call it freely; it's a no-op when not in a call.
-
-**Hydration "succeeds" but the embed still shows a broken product.**
-The fluent JS builder requires either zero `attributes` *and* zero `variations`, OR a fully consistent attributes-and-variations setup where every `variation.attributes[attrId] = optionId` references something declared in the parent `attributes`. Mismatches silently produce broken output.
+**Calling `notifyProductNavigation` from a screen the user reached without an active call does nothing.** Intentional — `isCallActive` gates the JS bridge so we don't spam the embed when no expert is watching.
 
 ---
 
-## What's *not* in the public API (yet)
+## What's *not* in the public API
 
 These are intentionally internal:
 
@@ -594,3 +376,9 @@ These are intentionally internal:
 - `EmbedEventRouter` — parses native-bridge messages.
 
 If you need WebView customization (custom `WKUIDelegate`, additional user scripts), open an issue and we can expose a focused customization protocol rather than leaking `WKWebView` directly.
+
+---
+
+## What's *not* here yet
+
+**Product hydration.** The `provide-product-data` round-trip was part of the v1.0.0 baseline and has been removed pending a redesign — the previous shape didn't fit Bambuser's actual product-builder semantics. If you need to hydrate products today, do it through your own JS handler injected on top of the embed and resolve it via `controller.notify(callbackKey:info:)`. A first-class hydration API will land in a later version.

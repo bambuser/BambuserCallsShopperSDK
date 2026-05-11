@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "3BCD3F7D-B194-45AB-BD11-F1FB1B026AB1"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "0F538802-DAE6-44DB-92DA-22C62CA6DB6C"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "BambuserCallsShopperDemo/App/BambuserCallsShopperDemoApp.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "18"
+            endingLineNumber = "18"
+            landmarkName = "unknown"
+            landmarkType = "0">
+            <Locations>
+               <Location
+                  uuid = "0F538802-DAE6-44DB-92DA-22C62CA6DB6C - b807b905fa85627b"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "one-time initialization function for demoEmbedUrlString"
+                  moduleName = "BambuserCallsShopperDemo.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/seemanta/Documents/Project/BambuserCallsShopperSDK/BambuserCallsShopperDemo/BambuserCallsShopperDemo/App/BambuserCallsShopperDemoApp.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "18"
+                  endingLineNumber = "18">
+               </Location>
+               <Location
+                  uuid = "0F538802-DAE6-44DB-92DA-22C62CA6DB6C - 4c487898a0fff793"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "BambuserCallsShopperDemo.demoEmbedUrlString.unsafeMutableAddressor : Swift.String"
+                  moduleName = "BambuserCallsShopperDemo.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/seemanta/Documents/Project/BambuserCallsShopperSDK/BambuserCallsShopperDemo/BambuserCallsShopperDemo/App/BambuserCallsShopperDemoApp.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "18"
+                  endingLineNumber = "18">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

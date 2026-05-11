@@ -1,0 +1,15 @@
+{
+  "originHash" : "e83f4f13a75f673977a3d30865fc9ddc7dc0177c70e39ce9586c18b519677846",
+  "pins" : [
+    {
+      "identity" : "bambusercallsshoppersdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bambuser/BambuserCallsShopperSDK.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "b2e03b74f0a58a5039b058bef48a190d1d8ad01c"
+      }
+    }
+  ],
+  "version" : 3
+}
