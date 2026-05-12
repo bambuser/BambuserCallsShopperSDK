@@ -6,6 +6,7 @@ A focused Swift package that wraps Bambuser's one-to-one video-consultation web 
 - A draggable PiP / floating mini-player that sizes itself to match the embed's viewport (slim ringing strip during connect, full mini-player after).
 - A two-method delegate (event stream + error channel) so the host can react to navigation, cart, checkout, and lifecycle events with a single `switch`.
 - An outbound `notify(callbackKey:info:)` helper for resolving JS-side callbacks from native code.
+- A runnable example app at [`BambuserCallsShopperDemo/`](./BambuserCallsShopperDemo) — open the `.xcodeproj`, fill in your org id + embed URL, build & run.
 
 > **Names**
 > - **Package / library**: `BambuserCalls-shopper` (the SwiftPM-facing name; this is what you write in `dependencies`).
@@ -14,6 +15,19 @@ A focused Swift package that wraps Bambuser's one-to-one video-consultation web 
 ## Add the package
 
 In Xcode: **File → Add Package Dependencies → Add Local…** and select this folder. Then add the `BambuserCalls-shopper` library to your app target. Legacy `BambuserCall` and `BambuserExpertChat` product aliases also point at the same module for backwards compatibility.
+
+## Try the demo
+
+A complete sample iOS app lives at [`BambuserCallsShopperDemo/`](./BambuserCallsShopperDemo). It bundles a five-SKU product catalog, a product list + detail screen, a cart tab with quantity controls, and a `BambuserCallBridge` that wires every `BambuserCallEvent` case into the demo's navigation and cart state — useful both as a runnable smoke test and as a reference integration.
+
+To run it:
+
+1. Open `BambuserCallsShopperDemo/BambuserCallsShopperDemo.xcodeproj` in Xcode 16+.
+2. Fill in `demoOrgId` and `demoEmbedUrlString` at the top of `BambuserCallsShopperDemo/BambuserCallsShopperDemo/App/BambuserCallsShopperDemoApp.swift`. The app shows a setup alert until both are set.
+3. Set the **Signing & Capabilities → Bundle Identifier** to one registered under your Apple Developer team.
+4. Build & run on an iOS 16+ device or simulator. Tap **Talk to expert** on any product to start a call.
+
+The project depends on this package via a SwiftPM **remote** reference (`https://github.com/bambuser/BambuserCallsShopperSDK.git`, branch `main`). To develop against the local source instead, swap the package reference to **Use Local Package…** pointing at this repo root.
 
 ## Quick start
 
