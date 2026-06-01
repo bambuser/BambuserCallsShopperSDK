@@ -7,47 +7,65 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "0F538802-DAE6-44DB-92DA-22C62CA6DB6C"
+            uuid = "799CFC09-7D71-49B1-B001-1D4B646CA79B"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "BambuserCallsShopperDemo/App/BambuserCallsShopperDemoApp.swift"
+            filePath = "../../../../Library/Developer/Xcode/DerivedData/BambuserCallsShopperDemo-gpbdnwdgsnjdrfekydcpoewuznbf/SourcePackages/checkouts/BambuserCallsShopperSDK/Sources/BambuserCallsShopper/BambuserCallController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "18"
-            endingLineNumber = "18"
-            landmarkName = "unknown"
-            landmarkType = "0">
-            <Locations>
-               <Location
-                  uuid = "0F538802-DAE6-44DB-92DA-22C62CA6DB6C - b807b905fa85627b"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "one-time initialization function for demoEmbedUrlString"
-                  moduleName = "BambuserCallsShopperDemo.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/seemanta/Documents/Project/BambuserCallsShopperSDK/BambuserCallsShopperDemo/BambuserCallsShopperDemo/App/BambuserCallsShopperDemoApp.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "18"
-                  endingLineNumber = "18">
-               </Location>
-               <Location
-                  uuid = "0F538802-DAE6-44DB-92DA-22C62CA6DB6C - 4c487898a0fff793"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "BambuserCallsShopperDemo.demoEmbedUrlString.unsafeMutableAddressor : Swift.String"
-                  moduleName = "BambuserCallsShopperDemo.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/seemanta/Documents/Project/BambuserCallsShopperSDK/BambuserCallsShopperDemo/BambuserCallsShopperDemo/App/BambuserCallsShopperDemoApp.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "18"
-                  endingLineNumber = "18">
-               </Location>
-            </Locations>
+            startingLineNumber = "79"
+            endingLineNumber = "79"
+            landmarkName = "notifyProductNavigation(externalId:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "52823033-B1BD-4BE4-966A-CF92A2E7F16D"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../Sources/BambuserCallsShopper/BambuserCallController.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "140"
+            endingLineNumber = "140"
+            landmarkName = "notifyProductNavigation(externalId:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "CA271798-8025-41AE-B2C4-1A8E4746A254"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "BambuserCallsShopperDemo/App/BambuserCallBridge.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "36"
+            endingLineNumber = "36"
+            landmarkName = "configure(controller:navigation:cart:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "AAA38702-7FD7-4BAB-B1ED-BA92E588D749"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "BambuserCallsShopperDemo/App/BambuserCallBridge.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "28"
+            endingLineNumber = "28"
+            landmarkName = "configure(controller:navigation:cart:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

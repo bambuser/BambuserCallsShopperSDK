@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5ABAB6202FB31AD0003355BE /* BambuserCalls-shopper in Frameworks */ = {isa = PBXBuildFile; productRef = 5ABAB6212FB31AD0003355BE /* BambuserCalls-shopper */; };
+		5A423D672FC82BC000FE9144 /* BambuserCalls-shopper in Frameworks */ = {isa = PBXBuildFile; productRef = 5A423D662FC82BC000FE9144 /* BambuserCalls-shopper */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5ABAB6202FB31AD0003355BE /* BambuserCalls-shopper in Frameworks */,
+				5A423D672FC82BC000FE9144 /* BambuserCalls-shopper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +70,7 @@
 			);
 			name = BambuserCallsShopperDemo;
 			packageProductDependencies = (
-				5ABAB6212FB31AD0003355BE /* BambuserCalls-shopper */,
+				5A423D662FC82BC000FE9144 /* BambuserCalls-shopper */,
 			);
 			productName = BambuserCallsShopperDemo;
 			productReference = 5ABAB60A2FB31AD0003355BE /* BambuserCallsShopperDemo.app */;
@@ -101,7 +101,7 @@
 			mainGroup = 5ABAB6012FB31AD0003355BE;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				5ABAB6222FB31AD0003355BE /* XCRemoteSwiftPackageReference "BambuserCallsShopperSDK" */,
+				5A423D652FC82BC000FE9144 /* XCLocalSwiftPackageReference "../../BambuserCallsShopperSDK" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5ABAB60B2FB31AD0003355BE /* Products */;
@@ -330,21 +330,16 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		5ABAB6222FB31AD0003355BE /* XCRemoteSwiftPackageReference "BambuserCallsShopperSDK" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/bambuser/BambuserCallsShopperSDK.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		5A423D652FC82BC000FE9144 /* XCLocalSwiftPackageReference "../../BambuserCallsShopperSDK" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../BambuserCallsShopperSDK;
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		5ABAB6212FB31AD0003355BE /* BambuserCalls-shopper */ = {
+		5A423D662FC82BC000FE9144 /* BambuserCalls-shopper */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5ABAB6222FB31AD0003355BE /* XCRemoteSwiftPackageReference "BambuserCallsShopperSDK" */;
 			productName = "BambuserCalls-shopper";
 		};
 /* End XCSwiftPackageProductDependency section */

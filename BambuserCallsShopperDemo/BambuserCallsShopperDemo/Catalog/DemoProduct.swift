@@ -19,4 +19,9 @@ struct DemoProduct: Identifiable, Equatable, Hashable {
     let description: String
     let imageURL: URL
     let additionalImages: [URL]
+    /// Product-page URL on demo.bambuser.shop, when the product is
+    /// actually live on the demo site. `nil` for products that were
+    /// retired from the demo catalog (agent's carousel will just skip
+    /// the link).
+    let url: URL?
 }

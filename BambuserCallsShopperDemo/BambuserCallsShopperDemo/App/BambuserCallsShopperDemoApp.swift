@@ -9,13 +9,15 @@ import BambuserCallsShopper
 // MARK: - Bambuser settings — fill these in before running the demo.
 
 /// Your Bambuser organization id. Get this from your Bambuser dashboard.
-private let demoOrgId = ""
+private let demoOrgId = "rakODREyCuvCZj1wvWUa"
 
 /// The Bambuser embed script URL.
 ///
 /// - Production:  `https://one-to-one.bambuser.com/embed.js`
+/// - Production:  `https://one-to-one.bambuser.com/eu/embed.js`
+
 /// - Labs branch: `https://labs.bambuser.com/one-to-one/gitlab-mr/<id>/embed.js`
-private let demoEmbedUrlString = ""
+private let demoEmbedUrlString = "https://lvs-121-dev.web.app/embed.js"
 
 private var demoEmbedUrl: URL? { URL(string: demoEmbedUrlString) }
 
@@ -35,7 +37,7 @@ struct BambuserCallsShopperDemoApp: App {
     @StateObject private var cart = CartStore()
     @StateObject private var bambuserCall: BambuserCallController
 
-    @State private var bridge: BambuserCallBridge?
+    @State private var handlersConfigured: Bool = false
     @State private var showSetupAlert: Bool = !isBambuserConfigured
 
     init() {
@@ -59,11 +61,13 @@ struct BambuserCallsShopperDemoApp: App {
                 .environmentObject(cart)
                 .environmentObject(bambuserCall)
                 .onAppear {
-                    if bridge == nil {
-                        let b = BambuserCallBridge(navigation: navigation, cart: cart)
-                        bridge = b
-                        bambuserCall.delegate = b
-                    }
+                    guard !handlersConfigured else { return }
+                    BambuserCallBridge.configure(
+                        controller: bambuserCall,
+                        navigation: navigation,
+                        cart: cart
+                    )
+                    handlersConfigured = true
                 }
                 .alert("Bambuser credentials missing", isPresented: $showSetupAlert) {
                     Button("OK", role: .cancel) { }

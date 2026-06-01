@@ -5,9 +5,9 @@
 
 import Foundation
 
-/// Errors the framework surfaces via
-/// `BambuserCallDelegate.bambuserCall(_:didEncounterError:)`. Hosts can log
-/// or surface them; otherwise the framework continues to no-op internally.
+/// Errors the framework surfaces via the `onError` handler on
+/// `BambuserCallHandlers`. Hosts can log or surface them; otherwise the
+/// framework continues to no-op internally.
 public enum BambuserCallError: Error {
 
     /// A native → JS `evaluateJavaScript` call failed. `operation` is a

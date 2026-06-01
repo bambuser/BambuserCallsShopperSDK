@@ -28,11 +28,7 @@ public struct BambuserCallOverlay: View {
 
                 EmbedWebView(
                     html: EmbedHTMLBuilder.makeHTML(
-                        orgId: orgId,
-                        embedUrl: controller.embedUrl,
-                        triggers: controller.configuration.triggers,
-                        floatingNavigationMode: controller.configuration.floatingNavigationMode,
-                        floatingFillMode: controller.configuration.floatingFillMode
+                        options: makeEmbedOptions(orgId: orgId)
                     ),
                     baseURL: EmbedHTMLBuilder.baseURL(for: controller.embedUrl),
                     configuration: controller.configuration,
@@ -80,6 +76,40 @@ public struct BambuserCallOverlay: View {
             }
         }
         .ignoresSafeArea()
+    }
+
+    private func makeEmbedOptions(orgId: String) -> EmbedHTMLBuilder.Options {
+        let cfg = controller.configuration
+        let data = cfg.initialCustomerData
+        let tags: BambuserJSONValue? = cfg.initialTrackingTags.isEmpty
+            ? nil
+            : cfg.initialTrackingTags.toJSONArray()
+
+        return EmbedHTMLBuilder.Options(
+            orgId: orgId,
+            embedUrl: controller.embedUrl,
+            connectId: controller.connectId,
+            queue: controller.queue ?? cfg.initialQueue,
+            triggers: cfg.triggers,
+            floatingNavigationMode: cfg.floatingNavigationMode,
+            floatingFillMode: cfg.floatingFillMode,
+            locale: cfg.locale,
+            data: data,
+            trackingTags: tags,
+            dropInEnabled: cfg.dropInEnabled,
+            bookingsEnabled: cfg.bookingsEnabled,
+            openBookingPage: cfg.openBookingPage,
+            bookingServiceIds: cfg.bookingServiceIds,
+            bookingResourceId: cfg.bookingResourceId,
+            bookingIframeUrl: cfg.bookingIframeUrl,
+            enableScanning: cfg.enableScanning,
+            merchantBaseUrl: cfg.merchantBaseUrl,
+            disableCoBrowsing: cfg.disableCoBrowsing,
+            themeId: cfg.themeId,
+            allowFirstPartyCookies: cfg.allowFirstPartyCookies,
+            disableDataLayerInterceptions: cfg.disableDataLayerInterceptions,
+            subscriptions: controller.activeSubscriptions
+        )
     }
 
     private var currentPipSize: CGSize {
