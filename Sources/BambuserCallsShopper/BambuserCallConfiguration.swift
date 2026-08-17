@@ -21,8 +21,10 @@ public struct BambuserCallConfiguration {
     /// Bambuser organization id. Hardcoded into the JS embed call.
     public var orgId: String
 
-    /// Embed script URL. Override for staging / labs / branch builds.
-    public var embedUrl: URL
+    /// Which Bambuser region to talk to (`.us` or `.eu`). The
+    /// embed script URL is looked up from this — hosts don't pass
+    /// URLs.
+    public var environment: BambuserEnvironment
 
     /// Frame for the connected mini-player (full video tile + controls).
     /// Default 180×260.
@@ -104,6 +106,13 @@ public struct BambuserCallConfiguration {
     /// separate and configured natively.
     public var allowFirstPartyCookies: Bool?
 
+    /// Install the JS emitter override that forwards *every* embed
+    /// event to `BambuserCallDelegate.bambuserCall(_:didReceiveEmbedEvent:payload:)`.
+    /// Default `false` — the SDK only crosses the bridge for events
+    /// it (or your data-source handlers) explicitly model. Turn on for
+    /// forward-compat with new embed events, or for analytics tees.
+    public var forwardUnknownEmbedEvents: Bool
+
     // MARK: - Internal defaults — not part of the public API
 
     internal var triggers: [String] = ["always", "connect-link"]
@@ -128,7 +137,7 @@ public struct BambuserCallConfiguration {
 
     public init(
         orgId: String,
-        embedUrl: URL = BambuserCallConfiguration.defaultEmbedUrl,
+        environment: BambuserEnvironment = .us,
         floatingPipSize: CGSize = BambuserCallConfiguration.defaultFloatingPipSize,
         isInspectable: Bool = BambuserCallConfiguration.defaultIsInspectable,
         autoExpandOnConnect: Bool = true,
@@ -147,10 +156,11 @@ public struct BambuserCallConfiguration {
         merchantBaseUrl: String? = nil,
         disableCoBrowsing: Bool = false,
         themeId: String? = nil,
-        allowFirstPartyCookies: Bool? = nil
+        allowFirstPartyCookies: Bool? = nil,
+        forwardUnknownEmbedEvents: Bool = false
     ) {
         self.orgId = orgId
-        self.embedUrl = embedUrl
+        self.environment = environment
         self.floatingPipSize = floatingPipSize
         self.isInspectable = isInspectable
         self.autoExpandOnConnect = autoExpandOnConnect
@@ -170,9 +180,8 @@ public struct BambuserCallConfiguration {
         self.disableCoBrowsing = disableCoBrowsing
         self.themeId = themeId
         self.allowFirstPartyCookies = allowFirstPartyCookies
+        self.forwardUnknownEmbedEvents = forwardUnknownEmbedEvents
     }
-
-    public static let defaultEmbedUrl = URL(string: "https://one-to-one.bambuser.com/embed.js")!
 
     public static let defaultFloatingPipSize = CGSize(width: 180, height: 260)
 

@@ -11,21 +11,28 @@ import BambuserCallsShopper
 /// Your Bambuser organization id. Get this from your Bambuser dashboard.
 private let demoOrgId = "rakODREyCuvCZj1wvWUa"
 
-/// The Bambuser embed script URL.
+/// Which Bambuser region this demo talks to in **release** builds.
+/// Change to `.eu` if your workspace is on the EU cluster.
+private let productionEnvironment: BambuserEnvironment = .us
+
+/// Environment the demo actually uses:
 ///
-/// - Production:  `https://one-to-one.bambuser.com/embed.js`
-/// - Production:  `https://one-to-one.bambuser.com/eu/embed.js`
+/// - DEBUG builds:   `.stageUS` (Bambuser-internal staging — URL is
+///                   `#if DEBUG`-gated inside the SDK and never lands
+///                   in release binaries).
+/// - Release builds: whatever `productionEnvironment` is set to.
+private var demoEnvironment: BambuserEnvironment {
+    #if DEBUG
+    return .stageUS
+    #else
+    return productionEnvironment
+    #endif
+}
 
-/// - Labs branch: `https://labs.bambuser.com/one-to-one/gitlab-mr/<id>/embed.js`
-private let demoEmbedUrlString = "https://lvs-121-dev.web.app/embed.js"
-
-private var demoEmbedUrl: URL? { URL(string: demoEmbedUrlString) }
-
-/// `true` once both `demoOrgId` and `demoEmbedUrlString` have been filled
-/// in with valid values. The UI uses this to gate the "Talk to expert"
-/// button and show a setup prompt at launch.
+/// `true` once `demoOrgId` has been filled in. The UI uses this to
+/// gate the "Talk to expert" button and show a setup prompt at launch.
 internal var isBambuserConfigured: Bool {
-    !demoOrgId.isEmpty && demoEmbedUrl != nil
+    !demoOrgId.isEmpty
 }
 
 // MARK: - App
@@ -37,19 +44,14 @@ struct BambuserCallsShopperDemoApp: App {
     @StateObject private var cart = CartStore()
     @StateObject private var bambuserCall: BambuserCallController
 
-    @State private var handlersConfigured: Bool = false
+    @State private var bridge: BambuserCallBridge?
     @State private var showSetupAlert: Bool = !isBambuserConfigured
 
     init() {
-        // Use the placeholder org id verbatim and fall back to the SDK's
-        // default embed URL if the demo URL is empty. The configuration is
-        // built either way so the rest of the app can mount cleanly — the
-        // "Talk to expert" button is gated separately on isBambuserConfigured.
-        let url = demoEmbedUrl ?? BambuserCallConfiguration.defaultEmbedUrl
         _bambuserCall = StateObject(wrappedValue: BambuserCallController(
             configuration: BambuserCallConfiguration(
                 orgId: demoOrgId,
-                embedUrl: url
+                environment: demoEnvironment
             )
         ))
     }
@@ -61,18 +63,18 @@ struct BambuserCallsShopperDemoApp: App {
                 .environmentObject(cart)
                 .environmentObject(bambuserCall)
                 .onAppear {
-                    guard !handlersConfigured else { return }
-                    BambuserCallBridge.configure(
+                    guard bridge == nil else { return }
+                    // Hold a strong reference — controller.delegate is weak.
+                    bridge = BambuserCallBridge.configure(
                         controller: bambuserCall,
                         navigation: navigation,
                         cart: cart
                     )
-                    handlersConfigured = true
                 }
                 .alert("Bambuser credentials missing", isPresented: $showSetupAlert) {
                     Button("OK", role: .cancel) { }
                 } message: {
-                    Text("Set demoOrgId and demoEmbedUrlString at the top of BambuserCallsShopperDemoApp.swift before starting an expert call.")
+                    Text("Set demoOrgId at the top of BambuserCallsShopperDemoApp.swift before starting an expert call.")
                 }
         }
     }

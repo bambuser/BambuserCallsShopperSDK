@@ -129,7 +129,7 @@ struct ProductDetailView: View {
             .alert("Bambuser credentials missing", isPresented: $showSetupAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("Set demoOrgId and demoEmbedUrlString at the top of BambuserCallsShopperDemoApp.swift before starting an expert call.")
+                Text("Set demoOrgId at the top of BambuserCallsShopperDemoApp.swift before starting an expert call.")
             }
         }
         .padding(.top, 4)

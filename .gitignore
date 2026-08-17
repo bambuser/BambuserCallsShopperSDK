@@ -1,0 +1,19 @@
+# Xcode
+.DS_Store
+*.xcuserstate
+xcuserdata/
+*.xcuserdata/
+DerivedData/
+build/
+.build/
+Package.resolved
+
+# Swift Package Manager
+.swiftpm/
+
+# CI / release artifacts
+.releaseNotes.md
+
+# Editor state
+*.swp
+*.swo

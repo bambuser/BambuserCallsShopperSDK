@@ -2,10 +2,9 @@
 //  EmbedEventRouter.swift
 //  BambuserCallsShopper
 //
-//  Routes JS-side events to the frozen handlers on the controller. No
-//  delegate, no event enum — every event ends up either in a handler or
-//  is dropped (either because there's no handler, or the SDK consumed
-//  it for internal state tracking).
+//  Routes JS-side events either into the controller's data-source
+//  handlers (which return values the SDK dispatches back to the embed)
+//  or into the fire-and-forget `BambuserCallDelegate`.
 //
 
 import Foundation
@@ -16,6 +15,7 @@ internal struct EmbedEventRouter {
     let controller: BambuserCallController
 
     private var handlers: BambuserCallHandlers { controller.activeHandlers }
+    private var delegate: (any BambuserCallDelegate)? { controller.delegate }
 
     func handle(rawMessage: String) {
         guard
@@ -30,7 +30,7 @@ internal struct EmbedEventRouter {
 
         case "close":
             controller.close()
-            handlers.onClose?()
+            emit(.close)
 
         case "iframe-message":
             handleIframeMessage(detail: json["detail"] as? String ?? "")
@@ -49,22 +49,38 @@ internal struct EmbedEventRouter {
              "disconnected", "ended":
             controller.setCallState(.ended)
 
-        // -- Conditionally subscribed (only fire if a handler exists) --
+        // -- Fire-and-forget events → delegate as BambuserCallEvent --
 
         case "goto-checkout":
-            handlers.onGotoCheckout?(jsonValue(from: json["payload"]) ?? .null)
+            emit(.checkout(cart: jsonValue(from: json["payload"]) ?? .null))
 
         case "goto-chat":
-            handlers.onGotoChat?()
+            emit(.chatRequested)
 
         case "surf-behind-to":
-            guard let handler = handlers.onNavigateToURL else { break }
             let payload = jsonValue(from: json["payload"]) ?? .null
             if case .object(let m) = payload,
                case .string(let s) = m["url"] ?? .null,
                let url = URL(string: s) {
-                handler(url)
+                emit(.navigateTo(url: url))
             }
+
+        case "queue-is-open":
+            emit(.queueOpened(parseQueueOpenState(json["payload"], isOpen: true)))
+
+        case "queue-is-closed":
+            emit(.queueClosed(parseQueueOpenState(json["payload"], isOpen: false)))
+
+        case "agents-online":
+            emit(.agentsOnlineChanged(parseAgentsOnline(json["payload"])))
+
+        case "queue-estimated-waiting-time":
+            emit(.waitingTimeChanged(parseWaitingTime(json["payload"])))
+
+        case "tracking-event":
+            emit(.trackingEvent(parseTrackingEvent(json["payload"])))
+
+        // -- Data-source events → handlers (need a reply) --
 
         case "should-add-item-to-cart":
             routeCartIntent(payload: json["payload"], add: true)
@@ -78,31 +94,15 @@ internal struct EmbedEventRouter {
         case "provide-search-data":
             routeProvideSearchData(payload: jsonValue(from: json["payload"]) ?? .null)
 
-        case "queue-is-open":
-            guard let onOpen = handlers.onQueueOpen else { break }
-            onOpen(parseQueueOpenState(json["payload"], isOpen: true))
-
-        case "queue-is-closed":
-            guard let onClosed = handlers.onQueueClosed else { break }
-            onClosed(parseQueueOpenState(json["payload"], isOpen: false))
-
-        case "agents-online":
-            guard let onAgents = handlers.onAgentsOnline else { break }
-            onAgents(parseAgentsOnline(json["payload"]))
-
-        case "queue-estimated-waiting-time":
-            guard let onWait = handlers.onQueueWaitingTime else { break }
-            onWait(parseWaitingTime(json["payload"]))
-
-        case "tracking-event":
-            guard let onTrack = handlers.onTrackingEvent else { break }
-            onTrack(parseTrackingEvent(json["payload"]))
-
-        // -- Catch-all (only forwarded when onEmbedEvent is set) --
+        // -- Catch-all (only forwarded when forwardUnknownEmbedEvents is true) --
 
         default:
-            handlers.onEmbedEvent?(event, jsonValue(from: json["payload"]) ?? .null)
+            emit(.other(name: event, payload: jsonValue(from: json["payload"]) ?? .null))
         }
+    }
+
+    private func emit(_ event: BambuserCallEvent) {
+        delegate?.bambuserCall(controller, didEmit: event)
     }
 
     // MARK: - Async data-source routing
@@ -115,11 +115,7 @@ internal struct EmbedEventRouter {
         for ref in refs {
             let ctrl = controller
             Task { @MainActor in
-                guard let spec = await handler(ref) else {
-                    // Nothing to reply with — the widget will show the
-                    // "product not found" state after its own timeout.
-                    return
-                }
+                guard let spec = await handler(ref) else { return }
                 ctrl.provideProductData(bambuserId: ref.bambuserId, factorySpec: spec)
             }
         }
@@ -196,9 +192,6 @@ internal struct EmbedEventRouter {
                 .replacingOccurrences(of: "\n", with: "\\n")
             return "{ success: false, reason: '\(escaped)' }"
         case .raw(let value):
-            // JSON is valid JS — encode and pass through verbatim so
-            // hosts can shape reply payloads Bambuser hasn't added
-            // convenience cases for yet.
             let encoder = JSONEncoder()
             if let data = try? encoder.encode(value),
                let s = String(data: data, encoding: .utf8) {
@@ -236,18 +229,13 @@ internal struct EmbedEventRouter {
                 let forwarded = json["data"] as? [String: Any],
                 let eventName = forwarded["eventName"] as? String
             else { return }
-            handleForwardedEvent(name: eventName, data: forwarded["data"])
+            // Only forward if the host opted into the firehose.
+            guard controller.activeSubscriptions.catchAllOther else { return }
+            emit(.other(name: eventName, payload: jsonValue(from: forwarded["data"]) ?? .null))
 
         default:
             break
         }
-    }
-
-    private func handleForwardedEvent(name: String, data: Any?) {
-        // The forwarded stream is only useful for hosts that opted into
-        // the catch-all — otherwise we drop.
-        guard let onEmbedEvent = handlers.onEmbedEvent else { return }
-        onEmbedEvent(name, jsonValue(from: data) ?? .null)
     }
 
     // MARK: - Payload parsers

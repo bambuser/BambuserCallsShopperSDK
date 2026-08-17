@@ -31,16 +31,22 @@ public final class BambuserCallController: ObservableObject {
     // MARK: - Configuration
 
     public let configuration: BambuserCallConfiguration
-    @Published public var embedUrl: URL
+    @Published public var environment: BambuserEnvironment
 
-    /// Register the closures you want called when the embed fires an
-    /// event or asks for data. Only non-nil closures result in a JS
-    /// `.on(...)` subscription.
+    /// Convenience — the embed script URL derived from `environment`.
+    /// Internal; hosts set the region via `environment`.
+    internal var embedUrl: URL { environment.embedURL }
+
+    /// Data-source closures — return a value for events where the SDK
+    /// needs to reply to the embed. Only non-nil handlers result in a
+    /// JS `.on(...)` subscription for that event.
     ///
-    /// **Mutation semantics**: the handler set is frozen at `show()`
-    /// time. Reassigning `handlers` mid-session logs a warning and has
-    /// no effect until the next `show()`. This is intentional — the JS
-    /// subscription set is committed to the embed HTML at load time.
+    /// For fire-and-forget notifications (checkout, chat, navigation,
+    /// queue, tracking, close, errors), use `delegate` instead.
+    ///
+    /// **Mutation semantics**: frozen at `show()` time — reassigning
+    /// mid-session logs a warning and takes effect on the next
+    /// `show()`.
     public var handlers: BambuserCallHandlers {
         get { publicHandlers }
         set {
@@ -52,6 +58,15 @@ public final class BambuserCallController: ObservableObject {
     }
     private var publicHandlers: BambuserCallHandlers = BambuserCallHandlers()
 
+    /// Fire-and-forget event stream. Assign a `BambuserCallDelegate`
+    /// to hear about widget lifecycle, queue status, checkout, chat,
+    /// navigation, tracking, and errors. Weak — the host holds the
+    /// strong reference.
+    ///
+    /// Delegate-mapped JS events are always subscribed on the embed;
+    /// they no-op natively when `delegate` is nil.
+    public weak var delegate: (any BambuserCallDelegate)?
+
     /// Frozen snapshot used by the router. Same value as `handlers` at
     /// `show()` time; unchanged for the lifetime of the session.
     internal private(set) var activeHandlers: BambuserCallHandlers = BambuserCallHandlers()
@@ -59,7 +74,8 @@ public final class BambuserCallController: ObservableObject {
     /// Which JS subscriptions the current HTML installed. Also frozen
     /// at `show()`.
     internal private(set) var activeSubscriptions: BambuserCallSubscriptions = BambuserCallSubscriptions(
-        from: BambuserCallHandlers()
+        handlers: BambuserCallHandlers(),
+        forwardUnknownEmbedEvents: false
     )
 
     public var isCallActive: Bool {
@@ -75,7 +91,7 @@ public final class BambuserCallController: ObservableObject {
 
     public init(configuration: BambuserCallConfiguration) {
         self.configuration = configuration
-        self.embedUrl = configuration.embedUrl
+        self.environment = configuration.environment
     }
 
     // MARK: - Lifecycle
@@ -84,18 +100,19 @@ public final class BambuserCallController: ObservableObject {
     /// current `handlers` snapshot for this session.
     public func show(
         orgId: String? = nil,
-        embedUrl: URL? = nil,
         connectId: String? = nil,
         queue: String? = nil
     ) {
-        if let embedUrl { self.embedUrl = embedUrl }
         self.orgId = orgId ?? configuration.orgId
         self.connectId = connectId
         self.queue = queue
 
         // Freeze the handler snapshot & derived subscription mask.
         activeHandlers = publicHandlers
-        activeSubscriptions = BambuserCallSubscriptions(from: publicHandlers)
+        activeSubscriptions = BambuserCallSubscriptions(
+            handlers: publicHandlers,
+            forwardUnknownEmbedEvents: configuration.forwardUnknownEmbedEvents
+        )
 
         self.isVisible = true
         self.isPiP = false
@@ -371,20 +388,19 @@ public final class BambuserCallController: ObservableObject {
         guard callState != newState else { return }
         print("[BambuserCall] callState: \(callState) → \(newState)")
         if newState == .ended {
-            let handler = activeHandlers.onCallStateChanged
             if configuration.dismissOnCallEnd {
                 close()
             } else {
                 callState = newState
             }
-            handler?(.ended)
+            emitEvent(.callStateChanged(.ended))
             return
         }
         callState = newState
         if newState == .connected, isPiP, configuration.autoExpandOnConnect {
             expand()
         }
-        activeHandlers.onCallStateChanged?(newState)
+        emitEvent(.callStateChanged(newState))
     }
 
     internal func attach(_ webView: WKWebView) {
@@ -392,11 +408,15 @@ public final class BambuserCallController: ObservableObject {
     }
 
     internal func reportError(_ error: BambuserCallError) {
-        activeHandlers.onError?(error)
+        delegate?.bambuserCall(self, didEncounter: error)
+    }
+
+    internal func emitEvent(_ event: BambuserCallEvent) {
+        delegate?.bambuserCall(self, didEmit: event)
     }
 
     private func emitPresentationChange() {
-        activeHandlers.onPresentationChanged?(isPiP, pipPresentation)
+        emitEvent(.presentationChanged(isPiP: isPiP, presentation: pipPresentation))
     }
 
     // MARK: - Async invoke plumbing
@@ -449,7 +469,7 @@ public final class BambuserCallController: ObservableObject {
             return String(data: data, encoding: .utf8)
         } catch {
             print("[BambuserCall] \(operation) encode failed: \(error)")
-            activeHandlers.onError?(.javaScriptEvaluationFailed(operation: operation, underlying: error))
+            delegate?.bambuserCall(self, didEncounter: .javaScriptEvaluationFailed(operation: operation, underlying: error))
             return nil
         }
     }
@@ -459,7 +479,8 @@ public final class BambuserCallController: ObservableObject {
             guard let self, let error else { return }
             print("[BambuserCall] \(operation) failed: \(error)")
             Task { @MainActor [weak self] in
-                self?.activeHandlers.onError?(.javaScriptEvaluationFailed(operation: operation, underlying: error))
+                guard let self else { return }
+                self.delegate?.bambuserCall(self, didEncounter: .javaScriptEvaluationFailed(operation: operation, underlying: error))
             }
         }
     }

@@ -2,94 +2,113 @@
 //  BambuserCallBridge.swift
 //  BambuserCallsShopperDemo
 //
-//  Builds a `BambuserCallHandlers` for the demo. No delegate protocol
-//  any more — each closure below is one JS `.on(...)` subscription the
-//  SDK will install. Omit a closure to opt out of the underlying event.
+//  Two responsibilities:
+//
+//  1. Implements `BambuserCallDelegate` — receives fire-and-forget
+//     events (close, checkout, chat, navigation, queue, tracking,
+//     errors) as delegate callbacks.
+//  2. Configures the four data-source handlers on the controller
+//     (`provideProductData` / `provideSearchData` / `shouldAddToCart`
+//     / `shouldUpdateCart`) — everything the SDK actually needs a
+//     value back from.
 //
 
 import Foundation
 import BambuserCallsShopper
 
 @MainActor
-enum BambuserCallBridge {
+final class BambuserCallBridge: BambuserCallDelegate {
 
-    /// Configure a controller with the demo's cart / navigation /
-    /// product / search hooks. Call once before `controller.show(...)`.
+    private let navigation: NavigationCoordinator
+    private let cart: CartStore
+
+    init(navigation: NavigationCoordinator, cart: CartStore) {
+        self.navigation = navigation
+        self.cart = cart
+    }
+
+    /// Attach the bridge to a controller: delegate + data-source
+    /// handlers, both.
+    ///
+    /// Returns the bridge so the app can hold a strong reference —
+    /// `controller.delegate` is `weak`.
+    @discardableResult
     static func configure(
         controller: BambuserCallController,
         navigation: NavigationCoordinator,
         cart: CartStore
-    ) {
+    ) -> BambuserCallBridge {
+        let bridge = BambuserCallBridge(navigation: navigation, cart: cart)
+        controller.delegate = bridge
+        controller.handlers = makeHandlers(cart: cart)
+        return bridge
+    }
+
+    // MARK: - Data-source handlers
+
+    private static func makeHandlers(cart: CartStore) -> BambuserCallHandlers {
         var handlers = BambuserCallHandlers()
 
-        // MARK: Product data ------------------------------------------------
-
         handlers.provideProductData = { ref in
+            print("[BambuserCallBridge] ▶︎ provideProductData ref=\(ref.ref) kind=\(ref.kind.rawValue) bambuserId=\(ref.bambuserId)")
+
             guard let sku = resolveSKU(from: ref) else {
-                print("[BambuserCallBridge] unresolved provide-product-data ref: \(ref)")
+                print("[BambuserCallBridge]   ✗ unresolved ref")
                 return nil
             }
             guard let product = ProductCatalog.product(for: sku) else {
-                print("[BambuserCallBridge] no catalog match for sku='\(sku)' (ref=\(ref))")
+                print("[BambuserCallBridge]   ✗ no catalog match for sku='\(sku)'")
                 return nil
             }
-            // Build via the demo's reference `BambuserProduct` model,
-            // then convert to the generic factory spec the SDK expects.
+            print("[BambuserCallBridge]   ✓ static hit for sku='\(sku)'")
             return product.toBambuserProduct().factorySpec
         }
 
-        // MARK: Search ------------------------------------------------------
+        handlers.provideSearchData = { request in
+            print("[BambuserCallBridge] ▶︎ provideSearchData term='\(request.term)' page=\(request.page)")
 
-//        handlers.provideSearchData = { request in
-//            print("[BambuserCallBridge] provide-search-data ref: \(request)")
-//
-//            let query = request.term
-//                .trimmingCharacters(in: .whitespacesAndNewlines)
-//                .lowercased()
-//
-//            let matches: [DemoProduct]
-//            if query.isEmpty {
-//                matches = ProductCatalog.all
-//            } else {
-//                matches = ProductCatalog.all.filter { p in
-//                    p.name.lowercased().contains(query)
-//                        || p.brand.lowercased().contains(query)
-//                        || p.category.lowercased().contains(query)
-//                        || p.id.lowercased().contains(query)
-//                }
-//            }
-//
-//            let pageSize = 10
-//            let totalMatches = matches.count
-//            let totalPages = max(1, Int(ceil(Double(totalMatches) / Double(pageSize))))
-//            let pageIndex = max(1, min(request.page, totalPages))
-//            let start = (pageIndex - 1) * pageSize
-//            let end = min(start + pageSize, totalMatches)
-//            let pageItems = totalMatches == 0 ? [] : Array(matches[start..<end])
-//
-//            let products: [BambuserSearchProduct] = pageItems.map { p in
-//                BambuserSearchProduct(
-//                    name: p.name,
-//                    imageUrl: p.imageURL.absoluteString,
-//                    sku: p.id,
-//                    price: BambuserPrice(current: p.price)
-//                )
-//            }
-//
-//            let response = BambuserSearchResponse(
-//                products: products,
-//                currency: pageItems.first?.currency ?? "USD",
-//                locale: "en-US",
-//                pagination: BambuserSearchPagination(
-//                    totalPages: totalPages,
-//                    totalMatches: totalMatches,
-//                    currentPageIndex: pageIndex
-//                )
-//            )
-//            return response.factorySpec
-//        }
+            let query = request.term
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .lowercased()
 
-        // MARK: Cart --------------------------------------------------------
+            let matches = query.isEmpty
+                ? ProductCatalog.all
+                : ProductCatalog.all.filter { p in
+                    p.name.lowercased().contains(query)
+                        || p.brand.lowercased().contains(query)
+                        || p.category.lowercased().contains(query)
+                        || p.id.lowercased().contains(query)
+                }
+
+            let pageSize = 10
+            let totalMatches = matches.count
+            let totalPages = max(1, Int(ceil(Double(totalMatches) / Double(pageSize))))
+            let pageIndex = max(1, min(request.page, totalPages))
+            let start = (pageIndex - 1) * pageSize
+            let end = min(start + pageSize, totalMatches)
+            let pageItems = totalMatches == 0 ? [] : Array(matches[start..<end])
+
+            let products: [BambuserSearchProduct] = pageItems.map { p in
+                BambuserSearchProduct(
+                    name: p.name,
+                    imageUrl: p.imageURL.absoluteString,
+                    sku: p.id,
+                    price: BambuserPrice(current: p.price)
+                )
+            }
+
+            let response = BambuserSearchResponse(
+                products: products,
+                currency: pageItems.first?.currency ?? "USD",
+                locale: "en-US",
+                pagination: BambuserSearchPagination(
+                    totalPages: totalPages,
+                    totalMatches: totalMatches,
+                    currentPageIndex: pageIndex
+                )
+            )
+            return response.factorySpec
+        }
 
         handlers.shouldAddToCart = { intent in
             guard !intent.sku.isEmpty else { return .failure(reason: "missing-sku") }
@@ -102,47 +121,10 @@ enum BambuserCallBridge {
             return .success
         }
 
-        // MARK: Widget events -----------------------------------------------
-
-        handlers.onGotoCheckout = { _ in navigation.switchTo(.cart) }
-
-        handlers.onGotoChat = {
-            print("[BambuserCallBridge] shopper picked chat instead of call")
-        }
-
-        handlers.onQueueOpen = { state in
-            print("[BambuserCallBridge] queue open (nextClose=\(state.nextCloseTime as Any))")
-        }
-        handlers.onQueueClosed = { state in
-            print("[BambuserCallBridge] queue closed (nextOpen=\(state.nextOpenTime as Any))")
-        }
-        handlers.onAgentsOnline = { a in
-            print("[BambuserCallBridge] agents online = \(a.numberOfAgentsOnline)")
-        }
-        handlers.onQueueWaitingTime = { w in
-            print("[BambuserCallBridge] estimated wait = \(w.estimatedWaitingTime)s (place=\(w.place))")
-        }
-        handlers.onTrackingEvent = { e in
-            if let name = e.eventName {
-                print("[BambuserCallBridge] tracking bam: \(name)")
-            } else if let ga4 = e.ga4Event {
-                print("[BambuserCallBridge] tracking ga4: \(ga4)")
-            }
-        }
-        handlers.onError = { error in
-            print("[BambuserCallBridge] error: \(error)")
-        }
-
-        // NOTE: we deliberately leave `onEmbedEvent` nil — the SDK
-        // won't forward the firehose of unknown events. Set it if you
-        // want a catch-all.
-
-        controller.handlers = handlers
+        return handlers
     }
 
-    /// Turn whatever the agent tool sent (SKU, URL, or scanned barcode)
-    /// into a catalog SKU string. For the demo URLs, we assume the last
-    /// path component is the SKU.
+    /// SKU / URL / scanned-code → catalog SKU string.
     private static func resolveSKU(from ref: BambuserProductRef) -> String? {
         switch ref.kind {
         case .productReference, .scannedCode:
@@ -153,5 +135,56 @@ enum BambuserCallBridge {
         case .unknown:
             return ref.ref.isEmpty ? nil : ref.ref
         }
+    }
+
+    // MARK: - BambuserCallDelegate
+
+    func bambuserCall(_ controller: BambuserCallController, didEmit event: BambuserCallEvent) {
+        switch event {
+        case .close:
+            print("[BambuserCallBridge] call closed")
+
+        case .callStateChanged(let state):
+            print("[BambuserCallBridge] callState → \(state)")
+
+        case .presentationChanged(let isPiP, let presentation):
+            print("[BambuserCallBridge] presentation → isPiP=\(isPiP), \(presentation)")
+
+        case .checkout:
+            navigation.switchTo(.cart)
+
+        case .chatRequested:
+            print("[BambuserCallBridge] shopper picked chat instead of call")
+
+        case .navigateTo(let url):
+            // For a real host: push into your SwiftUI router.
+            print("[BambuserCallBridge] agent asked to navigate to: \(url)")
+
+        case .queueOpened(let state):
+            print("[BambuserCallBridge] queue open (nextClose=\(state.nextCloseTime as Any))")
+
+        case .queueClosed(let state):
+            print("[BambuserCallBridge] queue closed (nextOpen=\(state.nextOpenTime as Any))")
+
+        case .agentsOnlineChanged(let a):
+            print("[BambuserCallBridge] agents online = \(a.numberOfAgentsOnline)")
+
+        case .waitingTimeChanged(let w):
+            print("[BambuserCallBridge] estimated wait = \(w.estimatedWaitingTime)s (place=\(w.place))")
+
+        case .trackingEvent(let e):
+            if let name = e.eventName {
+                print("[BambuserCallBridge] tracking bam: \(name)")
+            } else if let ga4 = e.ga4Event {
+                print("[BambuserCallBridge] tracking ga4: \(ga4)")
+            }
+
+        case .other(let name, _):
+            print("[BambuserCallBridge] unhandled embed event: \(name)")
+        }
+    }
+
+    func bambuserCall(_ controller: BambuserCallController, didEncounter error: BambuserCallError) {
+        print("[BambuserCallBridge] error: \(error)")
     }
 }

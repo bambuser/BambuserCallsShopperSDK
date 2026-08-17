@@ -278,34 +278,79 @@ internal enum EmbedHTMLBuilder {
 
     // MARK: - JS block builders
 
-    /// One `.on(name, …)` block per subscribed event. Nothing else.
+    /// The `.on(name, ...)` blocks the HTML installs. Delegate-mapped
+    /// events are always installed (the SDK just drops them natively
+    /// if no delegate is set); data-source events are gated on their
+    /// handler being present so the widget doesn't wait 30s for a
+    /// reply that will never come.
     private static func buildOnBlocks(subs: BambuserCallSubscriptions) -> String {
         var out: [String] = []
 
-        if subs.gotoCheckout {
-            out.append("""
-              oneToOneEmbed.on('goto-checkout', function(event) {
-                __post('goto-checkout', event || null);
-              });
-            """)
-        }
-        if subs.gotoChat {
-            out.append("""
-              oneToOneEmbed.on('goto-chat', function() {
-                __post('goto-chat');
-              });
-            """)
-        }
-        if subs.navigateToURL {
-            // The single point every agent-driven navigation passes
-            // through in MANUAL floatingPlayer mode. Includes checkout
-            // (routed via floatAbove() internally).
-            out.append("""
-              oneToOneEmbed.on('surf-behind-to', function(url) {
-                __post('surf-behind-to', { url: url });
-              });
-            """)
-        }
+        // -- Fire-and-forget (delegate-mapped) — ALWAYS installed --
+
+        out.append("""
+          oneToOneEmbed.on('goto-checkout', function(event) {
+            __post('goto-checkout', event || null);
+          });
+        """)
+        out.append("""
+          oneToOneEmbed.on('goto-chat', function() {
+            __post('goto-chat');
+          });
+        """)
+        // The single point every agent-driven navigation passes
+        // through in MANUAL floatingPlayer mode (checkout too).
+        out.append("""
+          oneToOneEmbed.on('surf-behind-to', function(url) {
+            __post('surf-behind-to', { url: url });
+          });
+        """)
+        out.append("""
+          oneToOneEmbed.on('queue-is-open', function(data) {
+            __post('queue-is-open', {
+              isOpen: true,
+              nextCloseTime: data && data.nextCloseTime != null ? data.nextCloseTime : null
+            });
+          });
+        """)
+        out.append("""
+          oneToOneEmbed.on('queue-is-closed', function(data) {
+            __post('queue-is-closed', {
+              isOpen: false,
+              nextOpenTime: data && data.nextOpenTime != null ? data.nextOpenTime : null
+            });
+          });
+        """)
+        out.append("""
+          oneToOneEmbed.on('agents-online', function(data) {
+            __post('agents-online', {
+              numberOfAgentsOnline: data && data.numberOfAgentsOnline != null ? data.numberOfAgentsOnline : 0,
+              queueId: data && (data.queueId || data.queue) || null
+            });
+          });
+        """)
+        out.append("""
+          oneToOneEmbed.on('queue-estimated-waiting-time', function(data) {
+            __post('queue-estimated-waiting-time', {
+              estimatedWaitingTime: data && data.estimatedWaitingTime != null ? data.estimatedWaitingTime : 0,
+              agents: data && data.agents != null ? data.agents : 0,
+              place:  data && data.place  != null ? data.place  : 0,
+              queueId: data && (data.queueId || data.queue) || null
+            });
+          });
+        """)
+        out.append("""
+          oneToOneEmbed.on('tracking-event', function(payload) {
+            try {
+              __post('tracking-event', JSON.parse(JSON.stringify(payload || {})));
+            } catch (e) {
+              __post('tracking-event', {});
+            }
+          });
+        """)
+
+        // -- Data-source (handler-mapped) — ONLY installed when handler set --
+
         if subs.shouldAddToCart {
             out.append("""
               oneToOneEmbed.on('should-add-item-to-cart', function(event, callback) {
@@ -354,81 +399,30 @@ internal enum EmbedHTMLBuilder {
               });
             """)
         }
-        if subs.queueIsOpen {
-            out.append("""
-              oneToOneEmbed.on('queue-is-open', function(data) {
-                __post('queue-is-open', {
-                  isOpen: true,
-                  nextCloseTime: data && data.nextCloseTime != null ? data.nextCloseTime : null
-                });
-              });
-            """)
-        }
-        if subs.queueIsClosed {
-            out.append("""
-              oneToOneEmbed.on('queue-is-closed', function(data) {
-                __post('queue-is-closed', {
-                  isOpen: false,
-                  nextOpenTime: data && data.nextOpenTime != null ? data.nextOpenTime : null
-                });
-              });
-            """)
-        }
-        if subs.agentsOnline {
-            out.append("""
-              oneToOneEmbed.on('agents-online', function(data) {
-                __post('agents-online', {
-                  numberOfAgentsOnline: data && data.numberOfAgentsOnline != null ? data.numberOfAgentsOnline : 0,
-                  queueId: data && (data.queueId || data.queue) || null
-                });
-              });
-            """)
-        }
-        if subs.queueWaitingTime {
-            out.append("""
-              oneToOneEmbed.on('queue-estimated-waiting-time', function(data) {
-                __post('queue-estimated-waiting-time', {
-                  estimatedWaitingTime: data && data.estimatedWaitingTime != null ? data.estimatedWaitingTime : 0,
-                  agents: data && data.agents != null ? data.agents : 0,
-                  place:  data && data.place  != null ? data.place  : 0,
-                  queueId: data && (data.queueId || data.queue) || null
-                });
-              });
-            """)
-        }
-        if subs.trackingEvent {
-            out.append("""
-              oneToOneEmbed.on('tracking-event', function(payload) {
-                try {
-                  __post('tracking-event', JSON.parse(JSON.stringify(payload || {})));
-                } catch (e) {
-                  __post('tracking-event', {});
-                }
-              });
-            """)
-        }
 
         return out.joined(separator: "\n")
     }
 
-    /// `handledByCase` map for the emitter override — every event that
-    /// we already have an explicit `.on(...)` handler for, so the
-    /// override doesn't double-post it.
+    /// `handledByCase` map for the emitter override — every event we
+    /// already have an explicit `.on(...)` handler for, so the
+    /// override doesn't double-post it. Delegate-mapped events are
+    /// always explicit; data-source events are conditional.
     private static func handledByCaseLiteral(subs: BambuserCallSubscriptions) -> String {
-        // 'close' is always explicit.
-        var names: [String] = ["close"]
-        if subs.gotoCheckout       { names.append("goto-checkout") }
-        if subs.gotoChat           { names.append("goto-chat") }
-        if subs.navigateToURL      { names.append("surf-behind-to") }
+        var names: [String] = [
+            "close",
+            "goto-checkout",
+            "goto-chat",
+            "surf-behind-to",
+            "queue-is-open",
+            "queue-is-closed",
+            "agents-online",
+            "queue-estimated-waiting-time",
+            "tracking-event",
+        ]
         if subs.shouldAddToCart    { names.append("should-add-item-to-cart") }
         if subs.shouldUpdateCart   { names.append("should-update-item-in-cart") }
         if subs.provideProductData { names.append("provide-product-data") }
         if subs.provideSearchData  { names.append("provide-search-data") }
-        if subs.queueIsOpen        { names.append("queue-is-open") }
-        if subs.queueIsClosed      { names.append("queue-is-closed") }
-        if subs.agentsOnline       { names.append("agents-online") }
-        if subs.queueWaitingTime   { names.append("queue-estimated-waiting-time") }
-        if subs.trackingEvent      { names.append("tracking-event") }
         let entries = names.map { "'\($0)': 1" }.joined(separator: ", ")
         return "{ \(entries) }"
     }
