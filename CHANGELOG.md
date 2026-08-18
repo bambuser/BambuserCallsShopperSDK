@@ -25,6 +25,20 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased]
 
+
+
+
+## [1.0.0] - 2026-08-18
+
+### Added
+- Initial release of BambuserCallsShopperSDK v1.0.0
+- Complete SDK for integrating live shopping call capabilities into merchant applications
+- Support for initiating and managing shopper calls during live shopping sessions
+- Real-time call state management and event handling
+- Comprehensive documentation and integration examples for merchants
+
+## [1.0.0] - 2026-08-18
+
 [Added]\
 [Surface agent-visible error messages from product and search handlers](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1217032281948716)
 
