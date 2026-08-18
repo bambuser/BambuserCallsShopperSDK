@@ -51,17 +51,18 @@ final class BambuserCallBridge: BambuserCallDelegate {
 
         handlers.provideProductData = { ref in
             print("[BambuserCallBridge] ▶︎ provideProductData ref=\(ref.ref) kind=\(ref.kind.rawValue) bambuserId=\(ref.bambuserId)")
+            return .error(message: "Unrecognised product reference: '\(ref.ref)'")
 
             guard let sku = resolveSKU(from: ref) else {
                 print("[BambuserCallBridge]   ✗ unresolved ref")
-                return nil
+                return .error(message: "Unrecognised product reference: '\(ref.ref)'")
             }
             guard let product = ProductCatalog.product(for: sku) else {
                 print("[BambuserCallBridge]   ✗ no catalog match for sku='\(sku)'")
-                return nil
+                return .error(message: "We don't sell '\(sku)'")
             }
             print("[BambuserCallBridge]   ✓ static hit for sku='\(sku)'")
-            return product.toBambuserProduct().factorySpec
+            return .reply(product.toBambuserProduct().factorySpec)
         }
 
         handlers.provideSearchData = { request in
@@ -70,6 +71,14 @@ final class BambuserCallBridge: BambuserCallDelegate {
             let query = request.term
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .lowercased()
+
+            // Example "verify function" — surface a searchable error
+            // to the agent when the query is unusable. In a real
+            // integration this would guard against malformed backend
+            // responses, quota errors, etc.
+            guard query.count <= 100 else {
+                return .error(message: "Search term too long")
+            }
 
             let matches = query.isEmpty
                 ? ProductCatalog.all
@@ -107,7 +116,7 @@ final class BambuserCallBridge: BambuserCallDelegate {
                     currentPageIndex: pageIndex
                 )
             )
-            return response.factorySpec
+            return .reply(response.factorySpec)
         }
 
         handlers.shouldAddToCart = { intent in

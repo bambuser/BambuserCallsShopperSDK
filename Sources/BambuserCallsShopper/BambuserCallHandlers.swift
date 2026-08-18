@@ -29,48 +29,57 @@ public struct BambuserCartIntent: Equatable, Sendable {
     }
 }
 
-/// What the host wants to tell the agent tool.
-///
-/// - `.success` shows the item as added / updated (serializes to `true`).
-/// - `.failure(reason:)` surfaces an error message next to the product
-///   ("out of stock", "cart locked", etc.) — serializes to `false` or
-///   `{success: false, reason: ...}`.
-/// - `.raw(BambuserJSONValue)` sends an arbitrary payload verbatim.
-///   Use this when the widget starts requiring a reply shape the
-///   preset cases don't cover — no SDK release needed to support it.
-public enum BambuserCartResult: Sendable, Equatable {
-    case success
-    case failure(reason: String? = nil)
-    case raw(BambuserJSONValue)
-}
+// MARK: - Unified handler reply
 
-// MARK: - Product / search data results
-
-/// Result of a `provideProductData` handler.
+/// One reply type for every data-source handler. The `Payload` is
+/// specialised per handler:
 ///
-/// - `.product(spec)` — the mapped product; SDK dispatches
-///   `updateProduct(bambuserId, factory => applySpec(factory, spec))`.
-/// - `.error(message:)` — surface a message to the agent. The SDK
-///   dispatches `updateProduct(bambuserId, () => { throw new Error(message) })`,
-///   which is the documented way to signal "we don't sell that". The
-///   message text is shown verbatim to the agent.
-/// - `.skip` — deliberately no reply. The agent tool spins for ~30s
-///   then shows its own timeout state. **Prefer `.error(message:)`
-///   in production** so the agent sees something actionable.
-public enum BambuserProductDataResult: Sendable {
-    case product(BambuserFactorySpec)
+///  - `provideProductData` / `provideSearchData` → `BambuserReply<BambuserFactorySpec>`
+///    (payload is a chained-builder description; SDK invokes the
+///    widget's factory callback with a builder derived from the spec)
+///
+///  - `shouldAddToCart` / `shouldUpdateCart` → `BambuserReply<BambuserJSONValue>`
+///    (payload is a raw JSON value the widget's callback accepts;
+///    the SDK passes it verbatim to `window[callback](value)`)
+///
+/// The three cases:
+///
+///  - `.reply(payload)` — send the payload; shape depends on the
+///    specialisation above.
+///  - `.error(message:)` — show `message` to the agent. For factory
+///    handlers, dispatched as `callback(() => { throw new Error(message) })`
+///    (the documented "we don't sell that" / "verify function"
+///    pattern). For cart handlers, dispatched as
+///    `callback({success: false, reason: message})`.
+///  - `.skip` — send no reply. Widget times out after ~30s. Prefer
+///    `.error(message:)` in production so the agent sees something
+///    actionable.
+public enum BambuserReply<Payload: Sendable>: Sendable {
+    case reply(Payload)
     case error(message: String)
     case skip
 }
 
-/// Result of a `provideSearchData` handler. Mirrors
-/// `BambuserProductDataResult` — throwing inside the widget's
-/// `searchResponse` callback is the documented way to signal
-/// "invalid search" / "search backend error" to the agent.
-public enum BambuserSearchDataResult: Sendable {
-    case results(BambuserFactorySpec)
-    case error(message: String)
-    case skip
+// MARK: - Cart shorthand
+
+public extension BambuserReply where Payload == BambuserJSONValue {
+
+    /// Cart success — equivalent to `.reply(.bool(true))`.
+    static var success: BambuserReply<BambuserJSONValue> {
+        .reply(.bool(true))
+    }
+
+    /// Cart failure with an optional reason.
+    /// - `nil` reason → `.reply(.bool(false))` (`callback(false)`).
+    /// - non-nil reason → `.reply(.object([success:false, reason:...]))`,
+    ///   which the widget surfaces on the product row.
+    static func failure(reason: String? = nil) -> BambuserReply<BambuserJSONValue> {
+        guard let reason else { return .reply(.bool(false)) }
+        return .reply(.object([
+            "success": .bool(false),
+            "reason":  .string(reason),
+        ]))
+    }
 }
 
 // MARK: - Handlers
@@ -87,21 +96,29 @@ public enum BambuserSearchDataResult: Sendable {
 /// All closures run on `@MainActor`.
 public struct BambuserCallHandlers {
 
-    /// The agent added a product in their tool. Return a
-    /// `BambuserFactorySpec` describing the `updateProduct(...)` chain
-    /// you want applied, or `nil` for "product not found".
-    public var provideProductData: (@MainActor (BambuserProductRef) async -> BambuserFactorySpec?)?
+    /// The agent added a product in their tool. Return:
+    ///  - `.reply(spec)` with a `BambuserFactorySpec` for the product,
+    ///  - `.error(message:)` to signal "we don't sell that" (widget
+    ///    calls `updateProduct` with a callback that throws),
+    ///  - `.skip` to send no reply (agent tool times out; prefer
+    ///    `.error` in production).
+    public var provideProductData: (@MainActor (BambuserProductRef) async -> BambuserReply<BambuserFactorySpec>)?
 
-    /// The agent is searching the catalog. Return a spec for the
-    /// `searchResponse(...)` chain, or `nil` for empty results.
-    public var provideSearchData: (@MainActor (BambuserSearchRequest) async -> BambuserFactorySpec?)?
+    /// The agent is searching the catalog. Return:
+    ///  - `.reply(spec)` with a `BambuserFactorySpec` for the results,
+    ///  - `.error(message:)` for a validation / backend error (the
+    ///    "verify function" pattern from the JS docs,
+    ///    `if (!validSearch(...)) throw ...`),
+    ///  - `.skip` to send no reply.
+    public var provideSearchData: (@MainActor (BambuserSearchRequest) async -> BambuserReply<BambuserFactorySpec>)?
 
     /// Agent adds an item to the cart. Return `.success`, `.failure`,
-    /// or `.raw(...)`.
-    public var shouldAddToCart: (@MainActor (BambuserCartIntent) async -> BambuserCartResult)?
+    /// `.reply(customJSON)`, `.error(message:)`, or `.skip`.
+    public var shouldAddToCart: (@MainActor (BambuserCartIntent) async -> BambuserReply<BambuserJSONValue>)?
 
     /// Agent updates a cart line (or removes with `quantity == 0`).
-    public var shouldUpdateCart: (@MainActor (BambuserCartIntent) async -> BambuserCartResult)?
+    /// Same reply shape as `shouldAddToCart`.
+    public var shouldUpdateCart: (@MainActor (BambuserCartIntent) async -> BambuserReply<BambuserJSONValue>)?
 
     public init() {}
 }

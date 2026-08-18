@@ -183,6 +183,53 @@ internal enum EmbedHTMLBuilder {
           }
         };
 
+        // Invoke a stashed callback with a builder that throws — the
+        // documented "verify function" pattern for provide-search-data
+        // and the "we don't sell that" pattern for provide-product-data
+        // when routed via a callback. The embed catches the throw and
+        // shows the message to the agent verbatim.
+        window.__bambuserApplyToCallbackWithError = function(callbackKey, errorMessage, deleteAfter) {
+          var cb = window[callbackKey];
+          if (typeof cb !== 'function') {
+            console.warn('[bambuser] applyToCallbackWithError: no callback', callbackKey);
+            return;
+          }
+          try {
+            cb(function() {
+              throw new Error(errorMessage || 'error');
+            });
+          } catch (e) {
+            // The throw inside the builder is the intended path — the
+            // embed catches it. We only reach this catch if the outer
+            // callback itself threw synchronously (unusual).
+            console.error('[bambuser] applyToCallbackWithError sync failure', callbackKey, e);
+          }
+          if (deleteAfter !== false) {
+            try { delete window[callbackKey]; } catch (e) { window[callbackKey] = undefined; }
+          }
+        };
+
+        // Call `oneToOneEmbed[method](...primaryArgs, () => { throw ... })`.
+        // The throw inside the callback surfaces the message to the
+        // agent via the embed's own error path — this is the
+        // documented way to signal "product not available" from
+        // provide-product-data.
+        window.__bambuserInvokeEmbedMethodWithError = function(method, primaryArgs, errorMessage) {
+          if (!window.oneToOneEmbed || typeof window.oneToOneEmbed[method] !== 'function') {
+            console.warn('[bambuser] invokeEmbedMethodWithError: not available', method);
+            return;
+          }
+          var args = (primaryArgs || []).slice();
+          args.push(function() {
+            throw new Error(errorMessage || 'error');
+          });
+          try {
+            window.oneToOneEmbed[method].apply(window.oneToOneEmbed, args);
+          } catch (e) {
+            console.error('[bambuser] invokeEmbedMethodWithError sync failure', method, e);
+          }
+        };
+
         window.__bambuserInvokeEmbedMethod = function(method, primaryArgs, spec) {
           if (!window.oneToOneEmbed || typeof window.oneToOneEmbed[method] !== 'function') {
             console.warn('[bambuser] invokeEmbedMethod: not available', method);

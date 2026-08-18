@@ -115,8 +115,15 @@ internal struct EmbedEventRouter {
         for ref in refs {
             let ctrl = controller
             Task { @MainActor in
-                guard let spec = await handler(ref) else { return }
-                ctrl.provideProductData(bambuserId: ref.bambuserId, factorySpec: spec)
+                switch await handler(ref) {
+                case .reply(let spec):
+                    ctrl.provideProductData(bambuserId: ref.bambuserId, factorySpec: spec)
+                case .error(let message):
+                    ctrl.provideProductError(bambuserId: ref.bambuserId, message: message)
+                case .skip:
+                    // Silent no-reply. Widget times out after ~30s.
+                    break
+                }
             }
         }
     }
@@ -133,15 +140,21 @@ internal struct EmbedEventRouter {
         }
         let ctrl = controller
         Task { @MainActor in
-            guard let spec = await handler(request) else { return }
-            ctrl.provideSearchData(callbackKey: request.callbackKey, factorySpec: spec)
+            switch await handler(request) {
+            case .reply(let spec):
+                ctrl.provideSearchData(callbackKey: request.callbackKey, factorySpec: spec)
+            case .error(let message):
+                ctrl.provideSearchError(callbackKey: request.callbackKey, message: message)
+            case .skip:
+                break
+            }
         }
     }
 
     // MARK: - Cart intent routing
 
     private func routeCartIntent(payload: Any?, add: Bool) {
-        let handler: (@MainActor (BambuserCartIntent) async -> BambuserCartResult)? =
+        let handler: (@MainActor (BambuserCartIntent) async -> BambuserReply<BambuserJSONValue>)? =
             add ? handlers.shouldAddToCart : handlers.shouldUpdateCart
         guard let handler else { return }
 
@@ -175,30 +188,33 @@ internal struct EmbedEventRouter {
 
         let ctrl = controller
         Task { @MainActor in
-            let result = await handler(intent)
-            ctrl.notify(callbackKey: callbackKey, info: cartResultJS(result))
+            switch await handler(intent) {
+            case .reply(let value):
+                ctrl.notify(callbackKey: callbackKey, info: jsonLiteral(value))
+            case .error(let message):
+                // Cart callbacks accept a plain value, not a builder,
+                // so throwing inside doesn't work here. Map to the
+                // documented `{success: false, reason}` shape.
+                let obj: BambuserJSONValue = .object([
+                    "success": .bool(false),
+                    "reason":  .string(message),
+                ])
+                ctrl.notify(callbackKey: callbackKey, info: jsonLiteral(obj))
+            case .skip:
+                break
+            }
         }
     }
 
-    private func cartResultJS(_ result: BambuserCartResult) -> String {
-        switch result {
-        case .success:
-            return "true"
-        case .failure(let reason):
-            guard let reason else { return "false" }
-            let escaped = reason
-                .replacingOccurrences(of: "\\", with: "\\\\")
-                .replacingOccurrences(of: "'", with: "\\'")
-                .replacingOccurrences(of: "\n", with: "\\n")
-            return "{ success: false, reason: '\(escaped)' }"
-        case .raw(let value):
-            let encoder = JSONEncoder()
-            if let data = try? encoder.encode(value),
-               let s = String(data: data, encoding: .utf8) {
-                return s
-            }
-            return "null"
+    /// Serialise a `BambuserJSONValue` as its natural JS/JSON literal.
+    /// JSON is valid JS so no extra escaping is needed at the call site.
+    private func jsonLiteral(_ value: BambuserJSONValue) -> String {
+        let encoder = JSONEncoder()
+        if let data = try? encoder.encode(value),
+           let s = String(data: data, encoding: .utf8) {
+            return s
         }
+        return "null"
     }
 
     // MARK: - Iframe message (viewport mode, forwarded events)

@@ -190,12 +190,23 @@ missing handlers mean the widget won't ask.
 
 ```swift
 public struct BambuserCallHandlers {
-    var provideProductData: (@MainActor (BambuserProductRef) async -> BambuserFactorySpec?)?
-    var provideSearchData:  (@MainActor (BambuserSearchRequest) async -> BambuserFactorySpec?)?
-    var shouldAddToCart:    (@MainActor (BambuserCartIntent) async -> BambuserCartResult)?
-    var shouldUpdateCart:   (@MainActor (BambuserCartIntent) async -> BambuserCartResult)?
+    var provideProductData: (@MainActor (BambuserProductRef)    async -> BambuserReply<BambuserFactorySpec>)?
+    var provideSearchData:  (@MainActor (BambuserSearchRequest) async -> BambuserReply<BambuserFactorySpec>)?
+    var shouldAddToCart:    (@MainActor (BambuserCartIntent)    async -> BambuserReply<BambuserJSONValue>)?
+    var shouldUpdateCart:   (@MainActor (BambuserCartIntent)    async -> BambuserReply<BambuserJSONValue>)?
 }
 ```
+
+All four handlers return the same shape: `BambuserReply<Payload>`
+with three cases:
+
+- `.reply(payload)` — send the payload to the widget. Payload shape
+  depends on the handler (factory spec vs raw JSON).
+- `.error(message:)` — show `message` to the agent. Factory handlers
+  dispatch `callback(() => { throw new Error(message) })`; cart
+  handlers dispatch `callback({success: false, reason: message})`.
+- `.skip` — send no reply. Widget times out; prefer `.error` so the
+  agent sees something.
 
 ### `provideProductData`
 
@@ -204,9 +215,13 @@ once per ref in the payload — you don't fan out.
 
 ```swift
 handlers.provideProductData = { ref in
-    guard let sku = resolveSKU(from: ref) else { return nil }
-    guard let product = catalog.product(for: sku) else { return nil }
-    return product.toBambuserFactorySpec()
+    guard let sku = resolveSKU(from: ref) else {
+        return .error(message: "Unrecognised reference: '\(ref.ref)'")
+    }
+    guard let product = catalog.product(for: sku) else {
+        return .error(message: "We don't sell '\(sku)'")
+    }
+    return .reply(product.toBambuserFactorySpec())
 }
 ```
 
@@ -219,37 +234,38 @@ handlers.provideProductData = { ref in
 | `bambuserId`  | `String`          | Echo back on the reply — SDK-owned                          |
 | `raw`         | `BambuserJSONValue` | Full raw JSON for the ref, including any new fields       |
 
-Returning `nil` = "product not found" — the agent tool shows the
-empty-state card after its own timeout.
-
 ### `provideSearchData`
 
 Fires when the agent types in the tool's search field.
 
 ```swift
 handlers.provideSearchData = { request in
+    guard request.term.count <= 100 else {
+        return .error(message: "Search term too long")
+    }
     let results = try? await searchAPI.search(request.term, page: request.page)
-    return results?.toBambuserFactorySpec()
+    guard let results else { return .skip }
+    return .reply(results.toBambuserFactorySpec())
 }
 ```
 
 `BambuserSearchRequest` fields: `term`, `page`, `callbackKey`, `raw`.
 
-Return `nil` for empty results.
-
 ### `shouldAddToCart` / `shouldUpdateCart`
 
 Fires when the agent adds or updates a cart line in their tool.
+`BambuserReply<BambuserJSONValue>` gets the cart-specific shorthand
+`.success` / `.failure(reason:)`:
 
 ```swift
 handlers.shouldAddToCart = { intent in
     do {
         try await cart.add(sku: intent.sku, quantity: intent.quantity)
-        return .success
+        return .success                            // → callback(true)
     } catch let e as OutOfStockError {
-        return .failure(reason: "out-of-stock")
+        return .failure(reason: "out-of-stock")    // → callback({success:false, reason:"..."})
     } catch {
-        return .failure()
+        return .failure()                          // → callback(false)
     }
 }
 ```
@@ -257,11 +273,14 @@ handlers.shouldAddToCart = { intent in
 `BambuserCartIntent` fields: `sku`, `quantity`, `previousQuantity`,
 `raw`.
 
-`BambuserCartResult`:
+Cart reply mapping:
 
-- `.success` → `true`
-- `.failure(reason: String?)` → `false` or `{success: false, reason: '...'}`
-- `.raw(BambuserJSONValue)` → any custom reply shape verbatim
+- `.success` / `.reply(.bool(true))` → `callback(true)`
+- `.failure()` / `.reply(.bool(false))` → `callback(false)`
+- `.failure(reason: "…")` → `callback({success: false, reason: "…"})`
+- `.reply(customJSON)` → `callback(customJSON)` — any shape
+- `.error(message: "…")` → `callback({success: false, reason: "…"})`
+- `.skip` → no reply
 
 ### Async handler semantics
 
@@ -538,8 +557,8 @@ in the handler / delegate case. Typed fields on payload structs are
 convenience — the full JSON is always in `raw`.
 
 **New reply shape the widget expects on cart.** Use
-`BambuserCartResult.raw(BambuserJSONValue)` for arbitrary reply
-payloads.
+`.reply(customJSON)` with any `BambuserJSONValue` shape — no SDK
+release needed.
 
 **New embed builder method.** Add it to your `BambuserFactorySpec`
 chain — the JS reducer walks it verbatim.

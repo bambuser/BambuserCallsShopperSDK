@@ -190,6 +190,48 @@ public final class BambuserCallController: ObservableObject {
         evaluate(js, operation: "invoke(embedMethod: \(embedMethod))")
     }
 
+    /// Call an embed method with a *throwing* callback appended as
+    /// the last argument. Under the hood:
+    /// `oneToOneEmbed[method](primaryArgs..., () => { throw new Error(message) })`.
+    /// Used by `provideProductError` — surfaces the message on the
+    /// agent's product card via the embed's own error path.
+    internal func invokeEmbedMethodWithError(
+        embedMethod: String,
+        primaryArgs: [BambuserJSONValue],
+        errorMessage: String
+    ) {
+        guard webView != nil else {
+            print("[BambuserCall] invokeEmbedMethodWithError(\(embedMethod)) — webView not ready")
+            return
+        }
+        guard
+            let argsJSON = encodeJS(primaryArgs, operation: "invokeEmbedMethodWithError(\(embedMethod))")
+        else { return }
+
+        let escapedName = JSEscape.escape(embedMethod)
+        let escapedMsg  = JSEscape.escape(errorMessage)
+        let js = "window.__bambuserInvokeEmbedMethodWithError('\(escapedName)', \(argsJSON), '\(escapedMsg)');"
+        evaluate(js, operation: "invokeEmbedMethodWithError(\(embedMethod))")
+    }
+
+    /// Invoke a stashed callback with a *throwing* builder. Under the
+    /// hood: `window[callbackKey](() => { throw new Error(message) })`.
+    /// Used by `provideSearchError`.
+    internal func applyErrorToCallback(
+        callbackKey: String,
+        errorMessage: String,
+        deleteAfterUse: Bool = true
+    ) {
+        guard webView != nil else {
+            print("[BambuserCall] applyErrorToCallback(\(callbackKey)) — webView not ready")
+            return
+        }
+        let escapedKey = JSEscape.escape(callbackKey)
+        let escapedMsg = JSEscape.escape(errorMessage)
+        let js = "window.__bambuserApplyToCallbackWithError('\(escapedKey)', '\(escapedMsg)', \(deleteAfterUse ? "true" : "false"));"
+        evaluate(js, operation: "applyErrorToCallback(\(callbackKey))")
+    }
+
     /// Reply to a live callback the embed handed us.
     public func invoke(
         callback callbackKey: String,
@@ -267,11 +309,32 @@ public final class BambuserCallController: ObservableObject {
         )
     }
 
+    /// Reply to `provide-product-data` with an error the agent sees on
+    /// the product card. Dispatches
+    /// `updateProduct(bambuserId, () => { throw new Error(message) })`.
+    /// This is the documented "we don't sell that" pattern from
+    /// https://bambuser.com/docs/video-consultation/provide-product-data/
+    public func provideProductError(bambuserId: String, message: String) {
+        invokeEmbedMethodWithError(
+            embedMethod: "updateProduct",
+            primaryArgs: [.string(bambuserId)],
+            errorMessage: message
+        )
+    }
+
     /// Reply to the `provide-search-data` event using the callback key
     /// carried on the request. Thin wrapper around
     /// `invoke(callback: callbackKey, factorySpec: spec)`.
     public func provideSearchData(callbackKey: String, factorySpec: BambuserFactorySpec) {
         invoke(callback: callbackKey, factorySpec: factorySpec)
+    }
+
+    /// Reply to `provide-search-data` with an error the agent sees.
+    /// Invokes the stashed `searchResponse` callback with a builder
+    /// that throws `Error(message)` — the "verify function" pattern
+    /// from the JS docs.
+    public func provideSearchError(callbackKey: String, message: String) {
+        applyErrorToCallback(callbackKey: callbackKey, errorMessage: message)
     }
 
     // MARK: - Shopper activity (notifyCustomerEvent)

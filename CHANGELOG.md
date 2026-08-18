@@ -25,6 +25,9 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased]
 
+[Added]\
+[Surface agent-visible error messages from product and search handlers](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1217032281948716)
+
 [Fixed]\
 [Stability and lifecycle improvements around the WebView bridge](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216955208394291)
 

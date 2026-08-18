@@ -188,10 +188,10 @@ you.
 - `invoke(embedMethod:...)` / `invoke(callback:...)` / `invoke(async:...)` — call any embed method, present or future
 
 **Future-proof by construction.** Every incoming payload carries
-`raw: BambuserJSONValue`, and every outgoing reply supports a raw
-JSON shape (`.raw(BambuserJSONValue)` on `BambuserCartResult`,
-`BambuserFactorySpec` for chain-builder replies). New embed fields
-and new embed methods don't require an SDK release.
+`raw: BambuserJSONValue`, and every handler returns
+`BambuserReply<Payload>` — one unified enum with `.reply(payload)` /
+`.error(message:)` / `.skip` cases. New embed fields and new embed
+methods don't require an SDK release.
 
 Full details: **[INTEGRATION.md](./INTEGRATION.md)**.
 

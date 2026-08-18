@@ -9,7 +9,7 @@ import BambuserCallsShopper
 // MARK: - Bambuser settings — fill these in before running the demo.
 
 /// Your Bambuser organization id. Get this from your Bambuser dashboard.
-private let demoOrgId = "rakODREyCuvCZj1wvWUa"
+private let demoOrgId = ""
 
 /// Which Bambuser region this demo talks to in **release** builds.
 /// Change to `.eu` if your workspace is on the EU cluster.
