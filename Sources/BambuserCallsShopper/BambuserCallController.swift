@@ -7,14 +7,13 @@ import SwiftUI
 import WebKit
 
 /// Owns the embed lifecycle, observable state, and the JS bridge.
+/// Host code holds one as a `@StateObject`, assigns handlers +
+/// delegate, drops a `BambuserCallOverlay` in its view tree, and
+/// calls `show(...)`.
 ///
-/// Host code typically holds one as a `@StateObject`, fills in a
-/// `BambuserCallHandlers` struct with the closures it wants, drops a
-/// `BambuserCallOverlay` in its view tree, and calls `show(...)`.
-///
-/// The handler set is snapshotted at `show()`; the SDK only wires the
-/// JS `.on(...)` subscriptions for events that have a non-nil handler,
-/// so unsubscribed events never cross the bridge.
+/// The handler set is snapshotted at `show()`; the SDK only wires
+/// the JS `.on(...)` subscriptions for events that have a non-nil
+/// handler.
 @MainActor
 public final class BambuserCallController: ObservableObject {
 
@@ -33,20 +32,10 @@ public final class BambuserCallController: ObservableObject {
     public let configuration: BambuserCallConfiguration
     @Published public var environment: BambuserEnvironment
 
-    /// Convenience — the embed script URL derived from `environment`.
-    /// Internal; hosts set the region via `environment`.
     internal var embedUrl: URL { environment.embedURL }
 
-    /// Data-source closures — return a value for events where the SDK
-    /// needs to reply to the embed. Only non-nil handlers result in a
-    /// JS `.on(...)` subscription for that event.
-    ///
-    /// For fire-and-forget notifications (checkout, chat, navigation,
-    /// queue, tracking, close, errors), use `delegate` instead.
-    ///
-    /// **Mutation semantics**: frozen at `show()` time — reassigning
-    /// mid-session logs a warning and takes effect on the next
-    /// `show()`.
+    /// Data-source closures. Frozen at `show()` — reassigning
+    /// mid-session takes effect on the next `show()`.
     public var handlers: BambuserCallHandlers {
         get { publicHandlers }
         set {
@@ -58,21 +47,14 @@ public final class BambuserCallController: ObservableObject {
     }
     private var publicHandlers: BambuserCallHandlers = BambuserCallHandlers()
 
-    /// Fire-and-forget event stream. Assign a `BambuserCallDelegate`
-    /// to hear about widget lifecycle, queue status, checkout, chat,
-    /// navigation, tracking, and errors. Weak — the host holds the
+    /// Fire-and-forget event stream. Weak — the host holds the
     /// strong reference.
-    ///
-    /// Delegate-mapped JS events are always subscribed on the embed;
-    /// they no-op natively when `delegate` is nil.
     public weak var delegate: (any BambuserCallDelegate)?
 
-    /// Frozen snapshot used by the router. Same value as `handlers` at
-    /// `show()` time; unchanged for the lifetime of the session.
+    /// Frozen snapshot used by the router.
     internal private(set) var activeHandlers: BambuserCallHandlers = BambuserCallHandlers()
 
-    /// Which JS subscriptions the current HTML installed. Also frozen
-    /// at `show()`.
+    /// JS subscriptions installed for the current session.
     internal private(set) var activeSubscriptions: BambuserCallSubscriptions = BambuserCallSubscriptions(
         handlers: BambuserCallHandlers(),
         forwardUnknownEmbedEvents: false
@@ -96,8 +78,8 @@ public final class BambuserCallController: ObservableObject {
 
     // MARK: - Lifecycle
 
-    /// Mount the overlay and start an expert-chat session. Freezes the
-    /// current `handlers` snapshot for this session.
+    /// Mount the overlay and start an expert-chat session. Freezes
+    /// the current `handlers` snapshot.
     public func show(
         orgId: String? = nil,
         connectId: String? = nil,
@@ -107,7 +89,6 @@ public final class BambuserCallController: ObservableObject {
         self.connectId = connectId
         self.queue = queue
 
-        // Freeze the handler snapshot & derived subscription mask.
         activeHandlers = publicHandlers
         activeSubscriptions = BambuserCallSubscriptions(
             handlers: publicHandlers,
@@ -125,8 +106,6 @@ public final class BambuserCallController: ObservableObject {
         connectId = nil
         queue = nil
         callState = .idle
-        // Any outstanding async invoke continuations are orphaned when the
-        // WebView dies — cancel them so awaiting Tasks get a clean error.
         cancelPendingAsyncInvokes(reason: "call closed")
     }
 
@@ -145,8 +124,8 @@ public final class BambuserCallController: ObservableObject {
 
     // MARK: - Outbound (host → embed)
 
-    /// Echo a host-side product navigation back into the embed. No-op
-    /// when no call is active.
+    /// Echo a host-side product navigation back into the embed.
+    /// No-op when no call is active.
     public func notifyProductNavigation(externalId: String) {
         guard isCallActive else {
             print("[BambuserCall] skipping notifyProductNavigation('\(externalId)') — call inactive (state=\(callState))")
@@ -190,11 +169,8 @@ public final class BambuserCallController: ObservableObject {
         evaluate(js, operation: "invoke(embedMethod: \(embedMethod))")
     }
 
-    /// Call an embed method with a *throwing* callback appended as
-    /// the last argument. Under the hood:
-    /// `oneToOneEmbed[method](primaryArgs..., () => { throw new Error(message) })`.
-    /// Used by `provideProductError` — surfaces the message on the
-    /// agent's product card via the embed's own error path.
+    /// Call an embed method with a throwing callback appended as the
+    /// last argument. Used by `provideProductError`.
     internal func invokeEmbedMethodWithError(
         embedMethod: String,
         primaryArgs: [BambuserJSONValue],
@@ -214,9 +190,8 @@ public final class BambuserCallController: ObservableObject {
         evaluate(js, operation: "invokeEmbedMethodWithError(\(embedMethod))")
     }
 
-    /// Invoke a stashed callback with a *throwing* builder. Under the
-    /// hood: `window[callbackKey](() => { throw new Error(message) })`.
-    /// Used by `provideSearchError`.
+    /// Invoke a stashed callback with a throwing builder. Used by
+    /// `provideSearchError`.
     internal func applyErrorToCallback(
         callbackKey: String,
         errorMessage: String,
@@ -252,7 +227,7 @@ public final class BambuserCallController: ObservableObject {
         evaluate(js, operation: "invoke(callback: \(callbackKey))")
     }
 
-    // MARK: - Async invoke (returns embed method's promise result)
+    // MARK: - Async invoke
 
     @discardableResult
     public func invoke(
@@ -277,8 +252,6 @@ public final class BambuserCallController: ObservableObject {
         let js = "window.__bambuserInvokeEmbedAsync('\(escapedId)', '\(escapedName)', \(argsJSON));"
 
         return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<BambuserJSONValue, Error>) in
-            // Store first, evaluate second — main-actor serial guarantees
-            // the store is visible before any response can arrive.
             pendingAsyncInvokes[requestId] = continuation
             webView?.evaluateJavaScript(js) { [weak self] _, error in
                 guard let error else { return }
@@ -294,13 +267,9 @@ public final class BambuserCallController: ObservableObject {
         }
     }
 
-    // MARK: - Convenience: provide-product-data / provide-search-data
+    // MARK: - Provide product / search data
 
-    /// Reply to the `provide-product-data` event for a single ref.
-    /// Thin wrapper around
-    /// `invoke(embedMethod: "updateProduct", primaryArgs: [.string(bambuserId)], factorySpec: spec)`.
-    /// Build the spec on the host side from whatever product model you
-    /// use — the SDK doesn't know or care what shape it has.
+    /// Reply to `provide-product-data` for a single ref.
     public func provideProductData(bambuserId: String, factorySpec: BambuserFactorySpec) {
         invoke(
             embedMethod: "updateProduct",
@@ -309,11 +278,8 @@ public final class BambuserCallController: ObservableObject {
         )
     }
 
-    /// Reply to `provide-product-data` with an error the agent sees on
-    /// the product card. Dispatches
-    /// `updateProduct(bambuserId, () => { throw new Error(message) })`.
-    /// This is the documented "we don't sell that" pattern from
-    /// https://bambuser.com/docs/video-consultation/provide-product-data/
+    /// Reply to `provide-product-data` with an agent-visible error
+    /// (the "we don't sell that" pattern).
     public func provideProductError(bambuserId: String, message: String) {
         invokeEmbedMethodWithError(
             embedMethod: "updateProduct",
@@ -322,39 +288,24 @@ public final class BambuserCallController: ObservableObject {
         )
     }
 
-    /// Reply to the `provide-search-data` event using the callback key
-    /// carried on the request. Thin wrapper around
-    /// `invoke(callback: callbackKey, factorySpec: spec)`.
+    /// Reply to `provide-search-data` using the callback key from the request.
     public func provideSearchData(callbackKey: String, factorySpec: BambuserFactorySpec) {
         invoke(callback: callbackKey, factorySpec: factorySpec)
     }
 
-    /// Reply to `provide-search-data` with an error the agent sees.
-    /// Invokes the stashed `searchResponse` callback with a builder
-    /// that throws `Error(message)` — the "verify function" pattern
-    /// from the JS docs.
+    /// Reply to `provide-search-data` with an agent-visible error.
     public func provideSearchError(callbackKey: String, message: String) {
         applyErrorToCallback(callbackKey: callbackKey, errorMessage: message)
     }
 
-    // MARK: - Shopper activity (notifyCustomerEvent)
+    // MARK: - Shopper activity
 
-    /// Report a shopper-driven event to the agent's widget without
-    /// going through the dataLayer interceptor. Pair with
-    /// `configuration.disableDataLayerInterceptions = true` (SDK
-    /// default) so there's exactly one authoritative source per
-    /// shopper action.
-    ///
-    /// Fire-and-forget: safe to call at any time. The embed drops the
-    /// message when no call is running.
-    ///
+    /// Report a shopper-driven event to the agent's widget.
     /// - Parameters:
-    ///   - eventKey: The **constant name** on
-    ///     `BambuserOneToOneEmbed.CUSTOMER_EVENTS` (e.g.
-    ///     `"ADDED_TO_CART"`). The SDK's JS helper looks it up at call
-    ///     time — future keys work without an SDK update.
-    ///   - payload: The event body. Shape it however the embed expects
-    ///     for the given key (typically `{sku, quantity, ...}`).
+    ///   - eventKey: Constant name on `BambuserOneToOneEmbed.CUSTOMER_EVENTS`
+    ///     (e.g. `"ADDED_TO_CART"`). Looked up at call time — future
+    ///     keys work without an SDK update.
+    ///   - payload: The event body (typically `{sku, quantity, ...}`).
     public func notifyCustomerEvent(_ eventKey: String, payload: BambuserJSONValue) {
         guard webView != nil else {
             print("[BambuserCall] notifyCustomerEvent(\(eventKey)) — webView not ready")
@@ -368,19 +319,12 @@ public final class BambuserCallController: ObservableObject {
         evaluate(js, operation: "notifyCustomerEvent(\(eventKey))")
     }
 
-    // MARK: - Customer data / tracking tags / queue / widget control / elements
+    // MARK: - Customer data / tracking tags / queue / widget control
 
-    /// Update the customer data the agent sees. Shape the payload on
-    /// the host side — usually a `.object([...])` of built-in fields
-    /// (`externalId`, `firstName`, `lastName`, `email`, `phone`) plus
-    /// any custom flat properties. Pass `nil` to trigger a refresh
-    /// via the initial `data` function configured at init.
+    /// Update the customer data the agent sees. Pass `nil` to trigger
+    /// a refresh via the initial `data` function.
     public func updateData(_ data: BambuserJSONValue? = nil) {
-        if let data, case .object(let map) = data, !map.isEmpty {
-            invoke(embedMethod: "updateData", primaryArgs: [data])
-        } else if let data {
-            // Non-object payloads still get forwarded — the embed will
-            // reject them, but that's the embed's contract, not ours.
+        if let data {
             invoke(embedMethod: "updateData", primaryArgs: [data])
         } else {
             invoke(embedMethod: "updateData")
@@ -430,9 +374,8 @@ public final class BambuserCallController: ObservableObject {
 
     // MARK: - Generic notify
 
-    /// Call a JS function registered on `window` by name, passing `info`
-    /// inline. Used by cart-callback replies and for anything else that
-    /// stashed a raw function on window.
+    /// Call a JS function registered on `window` by name, passing
+    /// `info` inline.
     public func notify(callbackKey: String, info: Any) {
         let escapedKey = JSEscape.escape(callbackKey)
         let js = """
@@ -445,7 +388,7 @@ public final class BambuserCallController: ObservableObject {
         evaluate(js, operation: "notify('\(callbackKey)')")
     }
 
-    // MARK: - Internal state hooks
+    // MARK: - Internal hooks
 
     internal func setCallState(_ newState: CallState) {
         guard callState != newState else { return }
@@ -487,7 +430,6 @@ public final class BambuserCallController: ObservableObject {
     private var asyncInvokeSeq: UInt = 0
     private var pendingAsyncInvokes: [String: CheckedContinuation<BambuserJSONValue, Error>] = [:]
 
-    /// Called by the router when a `__async-response` event arrives.
     internal func resolveAsyncInvoke(payload: [String: Any]?) {
         guard let payload, let requestId = payload["requestId"] as? String else { return }
         guard let cont = pendingAsyncInvokes.removeValue(forKey: requestId) else { return }
@@ -507,8 +449,6 @@ public final class BambuserCallController: ObservableObject {
         }
     }
 
-    /// Cancel every outstanding async-invoke continuation with an error.
-    /// Called on `close()` so awaiting Tasks unblock instead of leaking.
     private func cancelPendingAsyncInvokes(reason: String) {
         guard !pendingAsyncInvokes.isEmpty else { return }
         let dead = pendingAsyncInvokes

@@ -2,15 +2,9 @@
 //  BambuserCallBridge.swift
 //  BambuserCallsShopperDemo
 //
-//  Two responsibilities:
-//
-//  1. Implements `BambuserCallDelegate` — receives fire-and-forget
-//     events (close, checkout, chat, navigation, queue, tracking,
-//     errors) as delegate callbacks.
-//  2. Configures the four data-source handlers on the controller
-//     (`provideProductData` / `provideSearchData` / `shouldAddToCart`
-//     / `shouldUpdateCart`) — everything the SDK actually needs a
-//     value back from.
+//  Reference wiring you can copy into your own app:
+//   1. Implements `BambuserCallDelegate` — fire-and-forget events.
+//   2. Configures data-source handlers on the controller.
 //
 
 import Foundation
@@ -27,11 +21,9 @@ final class BambuserCallBridge: BambuserCallDelegate {
         self.cart = cart
     }
 
-    /// Attach the bridge to a controller: delegate + data-source
-    /// handlers, both.
-    ///
-    /// Returns the bridge so the app can hold a strong reference —
-    /// `controller.delegate` is `weak`.
+    /// Wire the bridge to a controller. Returns the bridge so the
+    /// host can hold a strong reference — `controller.delegate` is
+    /// `weak`.
     @discardableResult
     static func configure(
         controller: BambuserCallController,
@@ -49,33 +41,33 @@ final class BambuserCallBridge: BambuserCallDelegate {
     private static func makeHandlers(cart: CartStore) -> BambuserCallHandlers {
         var handlers = BambuserCallHandlers()
 
+        // NOTE: If your product catalogue is uploaded to BamHub (or
+        // connected as a product feed), skip provideProductData and
+        // provideSearchData entirely — Bambuser hydrates product
+        // cards and search automatically from the feed. Only wire
+        // these when the catalogue can't be exposed to BamHub.
+
         handlers.provideProductData = { ref in
-            print("[BambuserCallBridge] ▶︎ provideProductData ref=\(ref.ref) kind=\(ref.kind.rawValue) bambuserId=\(ref.bambuserId)")
-            return .error(message: "Unrecognised product reference: '\(ref.ref)'")
+            print("[BambuserCallBridge] provideProductData ref=\(ref.ref) kind=\(ref.kind.rawValue)")
 
             guard let sku = resolveSKU(from: ref) else {
-                print("[BambuserCallBridge]   ✗ unresolved ref")
                 return .error(message: "Unrecognised product reference: '\(ref.ref)'")
             }
             guard let product = ProductCatalog.product(for: sku) else {
-                print("[BambuserCallBridge]   ✗ no catalog match for sku='\(sku)'")
                 return .error(message: "We don't sell '\(sku)'")
             }
-            print("[BambuserCallBridge]   ✓ static hit for sku='\(sku)'")
             return .reply(product.toBambuserProduct().factorySpec)
         }
 
         handlers.provideSearchData = { request in
-            print("[BambuserCallBridge] ▶︎ provideSearchData term='\(request.term)' page=\(request.page)")
+            print("[BambuserCallBridge] provideSearchData term='\(request.term)' page=\(request.page)")
 
             let query = request.term
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .lowercased()
 
-            // Example "verify function" — surface a searchable error
-            // to the agent when the query is unusable. In a real
-            // integration this would guard against malformed backend
-            // responses, quota errors, etc.
+            // Example "verify function" — return an agent-visible
+            // error when the query is unusable.
             guard query.count <= 100 else {
                 return .error(message: "Search term too long")
             }
@@ -119,6 +111,9 @@ final class BambuserCallBridge: BambuserCallDelegate {
             return .reply(response.factorySpec)
         }
 
+        // Cart handlers are independent of BamHub — wire these when
+        // you want video-call "add to cart" to land in your app's
+        // own cart.
         handlers.shouldAddToCart = { intent in
             guard !intent.sku.isEmpty else { return .failure(reason: "missing-sku") }
             cart.setQuantity(intent.quantity, for: intent.sku)
@@ -133,7 +128,8 @@ final class BambuserCallBridge: BambuserCallDelegate {
         return handlers
     }
 
-    /// SKU / URL / scanned-code → catalog SKU string.
+    /// SKU / URL / scanned-code → catalog SKU string. Adapt to your
+    /// own URL scheme.
     private static func resolveSKU(from ref: BambuserProductRef) -> String? {
         switch ref.kind {
         case .productReference, .scannedCode:
@@ -166,7 +162,8 @@ final class BambuserCallBridge: BambuserCallDelegate {
             print("[BambuserCallBridge] shopper picked chat instead of call")
 
         case .navigateTo(let url):
-            // For a real host: push into your SwiftUI router.
+            // Push into your router when you wire co-browse into
+            // the shopper's actual navigation stack.
             print("[BambuserCallBridge] agent asked to navigate to: \(url)")
 
         case .queueOpened(let state):

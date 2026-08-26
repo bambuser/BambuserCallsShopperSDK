@@ -5,9 +5,8 @@
 
 import Foundation
 
-/// Floating layout the embed is rendering. Drives the native PiP frame
-/// size: `.minimized` for the dial-up ringing strip, `.floating` for the
-/// connected mini-player.
+/// Floating layout the embed is rendering. `.floating` is the connected
+/// mini-player; `.minimized` is the ringing / dial-up strip.
 public enum PipPresentation: Equatable, Sendable {
     case minimized
     case floating

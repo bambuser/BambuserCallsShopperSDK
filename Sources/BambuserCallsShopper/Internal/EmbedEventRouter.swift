@@ -2,10 +2,6 @@
 //  EmbedEventRouter.swift
 //  BambuserCallsShopper
 //
-//  Routes JS-side events either into the controller's data-source
-//  handlers (which return values the SDK dispatches back to the embed)
-//  or into the fire-and-forget `BambuserCallDelegate`.
-//
 
 import Foundation
 
@@ -26,7 +22,7 @@ internal struct EmbedEventRouter {
 
         switch event {
 
-        // -- Always subscribed by the SDK --
+        // Always subscribed by the SDK
 
         case "close":
             controller.close()
@@ -38,7 +34,6 @@ internal struct EmbedEventRouter {
         case "__async-response":
             controller.resolveAsyncInvoke(payload: json["payload"] as? [String: Any])
 
-        // Call-state transitions come through the emitter override.
         case "call-started", "call-starting", "call-connecting", "call-ringing":
             controller.setCallState(.connecting)
 
@@ -49,7 +44,7 @@ internal struct EmbedEventRouter {
              "disconnected", "ended":
             controller.setCallState(.ended)
 
-        // -- Fire-and-forget events → delegate as BambuserCallEvent --
+        // Fire-and-forget → delegate
 
         case "goto-checkout":
             emit(.checkout(cart: jsonValue(from: json["payload"]) ?? .null))
@@ -80,7 +75,7 @@ internal struct EmbedEventRouter {
         case "tracking-event":
             emit(.trackingEvent(parseTrackingEvent(json["payload"])))
 
-        // -- Data-source events → handlers (need a reply) --
+        // Data-source (needs a reply) → handlers
 
         case "should-add-item-to-cart":
             routeCartIntent(payload: json["payload"], add: true)
@@ -94,8 +89,7 @@ internal struct EmbedEventRouter {
         case "provide-search-data":
             routeProvideSearchData(payload: jsonValue(from: json["payload"]) ?? .null)
 
-        // -- Catch-all (only forwarded when forwardUnknownEmbedEvents is true) --
-
+        // Catch-all — forwarded only if forwardUnknownEmbedEvents is true
         default:
             emit(.other(name: event, payload: jsonValue(from: json["payload"]) ?? .null))
         }
@@ -107,8 +101,6 @@ internal struct EmbedEventRouter {
 
     // MARK: - Async data-source routing
 
-    /// `provide-product-data` — spawn one Task per ref (they have unique
-    /// bambuserIds; no race).
     private func routeProvideProductData(payload: BambuserJSONValue) {
         guard let handler = handlers.provideProductData else { return }
         let refs = BambuserProductRef.decode(from: payload)
@@ -121,14 +113,12 @@ internal struct EmbedEventRouter {
                 case .error(let message):
                     ctrl.provideProductError(bambuserId: ref.bambuserId, message: message)
                 case .skip:
-                    // Silent no-reply. Widget times out after ~30s.
                     break
                 }
             }
         }
     }
 
-    /// `provide-search-data` — single Task keyed by callbackId.
     private func routeProvideSearchData(payload: BambuserJSONValue) {
         guard let handler = handlers.provideSearchData else { return }
         guard let request = BambuserSearchRequest.decode(from: payload) else {
@@ -192,9 +182,8 @@ internal struct EmbedEventRouter {
             case .reply(let value):
                 ctrl.notify(callbackKey: callbackKey, info: jsonLiteral(value))
             case .error(let message):
-                // Cart callbacks accept a plain value, not a builder,
-                // so throwing inside doesn't work here. Map to the
-                // documented `{success: false, reason}` shape.
+                // Cart callbacks accept a value, not a builder — map
+                // errors to `{success:false, reason}`.
                 let obj: BambuserJSONValue = .object([
                     "success": .bool(false),
                     "reason":  .string(message),
@@ -206,8 +195,6 @@ internal struct EmbedEventRouter {
         }
     }
 
-    /// Serialise a `BambuserJSONValue` as its natural JS/JSON literal.
-    /// JSON is valid JS so no extra escaping is needed at the call site.
     private func jsonLiteral(_ value: BambuserJSONValue) -> String {
         let encoder = JSONEncoder()
         if let data = try? encoder.encode(value),
@@ -217,7 +204,7 @@ internal struct EmbedEventRouter {
         return "null"
     }
 
-    // MARK: - Iframe message (viewport mode, forwarded events)
+    // MARK: - Iframe message
 
     private func handleIframeMessage(detail: String) {
         guard
@@ -245,7 +232,6 @@ internal struct EmbedEventRouter {
                 let forwarded = json["data"] as? [String: Any],
                 let eventName = forwarded["eventName"] as? String
             else { return }
-            // Only forward if the host opted into the firehose.
             guard controller.activeSubscriptions.catchAllOther else { return }
             emit(.other(name: eventName, payload: jsonValue(from: forwarded["data"]) ?? .null))
 

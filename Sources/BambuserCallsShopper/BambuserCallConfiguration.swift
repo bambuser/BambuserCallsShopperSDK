@@ -6,66 +6,51 @@
 import SwiftUI
 
 /// Frozen-at-init configuration for a `BambuserCallController`.
-///
-/// The public surface covers the six presentation knobs the SDK owns and
-/// every option the JS embed constructor accepts. Nullable options
-/// (`dropInEnabled`, `bookingsEnabled`, etc.) are only forwarded when
-/// the host explicitly sets them — otherwise the embed's own default
-/// applies.
+/// Nullable options are only forwarded to the embed when the host
+/// explicitly sets them; otherwise the embed's default applies.
 ///
 /// See https://bambuser.com/docs/video-consultation/calls-widget-api-reference/#configuration-options
 public struct BambuserCallConfiguration {
 
     // MARK: - Presentation (SDK-owned)
 
-    /// Bambuser organization id. Hardcoded into the JS embed call.
+    /// Bambuser organization id.
     public var orgId: String
 
-    /// Which Bambuser region to talk to (`.us` or `.eu`). The
-    /// embed script URL is looked up from this — hosts don't pass
-    /// URLs.
+    /// Which Bambuser region to talk to.
     public var environment: BambuserEnvironment
 
-    /// Frame for the connected mini-player (full video tile + controls).
-    /// Default 180×260.
+    /// Frame for the connected mini-player. Default 180×260.
     public var floatingPipSize: CGSize
 
-    /// Whether `WKWebView.isInspectable` is set. Defaults to `true` in
-    /// DEBUG, `false` in release builds.
+    /// `WKWebView.isInspectable`. Defaults to `true` in DEBUG, `false` in release.
     public var isInspectable: Bool
 
-    /// When the call transitions to `.connected` while the user is in PiP,
-    /// auto-restore to full screen. Default `true`.
+    /// Auto-restore full screen when the call connects while in PiP. Default `true`.
     public var autoExpandOnConnect: Bool
 
-    /// When the call ends (`call-ended` and friends), automatically dismiss
-    /// the overlay. Default `true`.
+    /// Auto-dismiss the overlay when the call ends. Default `true`.
     public var dismissOnCallEnd: Bool
 
-    // MARK: - Embed constructor options (forwarded to JS)
+    // MARK: - Embed constructor options
 
-    /// Language + region for the embed UI (e.g. `"sv-SE"`). Must match a
-    /// translation enabled in BamHub. Default is the embed's own default
-    /// (`en-US`).
+    /// Language + region for the embed UI (e.g. `"sv-SE"`). Must
+    /// match a translation enabled in BamHub.
     public var locale: String?
 
-    /// Initial customer data presented to the agent — a
-    /// `.object([...])` payload. Shape it however you want on the host
-    /// side (typically the embed's built-in `externalId` / `firstName`
-    /// / `lastName` / `email` / `phone` fields, plus any flat custom
-    /// properties). Update later with `controller.updateData(_:)`.
+    /// Initial customer data presented to the agent. Update at
+    /// runtime with `controller.updateData(_:)`.
     public var initialCustomerData: BambuserJSONValue?
 
-    /// Initial analytics tags for the session. Update later with
-    /// `controller.setTrackingTags(_:)`. Max 20; last-key-wins on dupes.
+    /// Initial analytics tags. Max 20; last-key-wins on dupes.
+    /// Update at runtime with `controller.setTrackingTags(_:)`.
     public var initialTrackingTags: [BambuserTrackingTag]
 
-    /// Initial queue for drop-in calls. Overrides the workspace default.
-    /// Update later with `controller.setQueue(_:)`.
+    /// Initial queue for drop-in calls. Overrides the workspace
+    /// default. Update at runtime with `controller.setQueue(_:)`.
     public var initialQueue: String?
 
-    /// Show the drop-in card on the start screen. `nil` → embed default
-    /// (`true`).
+    /// Show the drop-in card on the start screen. `nil` → embed default.
     public var dropInEnabled: Bool?
 
     /// Show the booking card on the start screen. `nil` → BamHub setting.
@@ -74,46 +59,35 @@ public struct BambuserCallConfiguration {
     /// Open the widget directly on the booking page. Default `false`.
     public var openBookingPage: Bool
 
-    /// Restrict which booking services are visible. `nil` → all
-    /// published services.
+    /// Restrict visible booking services. `nil` → all published services.
     public var bookingServiceIds: [String]?
 
     /// Pin the widget to a specific booking resource.
     public var bookingResourceId: String?
 
-    /// Custom booking iframe URL — typically for external booking system
-    /// integrations.
+    /// Custom booking iframe URL for external booking-system integrations.
     public var bookingIframeUrl: String?
 
-    /// Enable barcode / QR scanning in the agent mobile app during a
-    /// call. Default `false`.
+    /// Enable barcode / QR scanning in the agent app. Default `false`.
     public var enableScanning: Bool
 
-    /// Base URL to send the agent to when they enter co-browsing mode.
-    /// Defaults to `window.origin` (which for the mobile SDK resolves to
-    /// the embed host, not particularly useful — set this explicitly if
-    /// you use co-browsing).
+    /// Base URL sent to the agent for co-browsing.
     public var merchantBaseUrl: String?
 
-    /// Disable the co-browsing feature. Default `false` (embed decides).
+    /// Disable co-browsing. Default `false`.
     public var disableCoBrowsing: Bool
 
     /// Override the active BamHub theme.
     public var themeId: String?
 
-    /// Whether the embed can write first-party cookies. `nil` → embed
-    /// default (`true`). Note: the WebView's own cookie policy is
-    /// separate and configured natively.
+    /// Whether the embed can write first-party cookies. `nil` → embed default.
     public var allowFirstPartyCookies: Bool?
 
-    /// Install the JS emitter override that forwards *every* embed
-    /// event to `BambuserCallDelegate.bambuserCall(_:didReceiveEmbedEvent:payload:)`.
-    /// Default `false` — the SDK only crosses the bridge for events
-    /// it (or your data-source handlers) explicitly model. Turn on for
-    /// forward-compat with new embed events, or for analytics tees.
+    /// Forward every embed event to `BambuserCallEvent.other`.
+    /// Default `false`. Turn on for forward-compat or analytics tees.
     public var forwardUnknownEmbedEvents: Bool
 
-    // MARK: - Internal defaults — not part of the public API
+    // MARK: - Internal defaults
 
     internal var triggers: [String] = ["always", "connect-link"]
     internal var floatingNavigationMode: String = "manual"
@@ -124,13 +98,6 @@ public struct BambuserCallConfiguration {
     internal var transitionAnimation: Animation = .easeInOut(duration: 0.22)
     internal var customUserAgent: String? = BambuserCallConfiguration.bambuserSafariUserAgent
     internal var injectsLegacyGetUserMediaShim: Bool = true
-
-    /// Always `true` for the mobile SDK — the merchant's page-level
-    /// GTM / GA data layer does not exist inside our WebView, so the
-    /// embed's data-layer interceptors have nothing to attach to and
-    /// their probes just add noise (and occasional crashes on some
-    /// embed builds). Not part of the public API — hosts don't need
-    /// to think about this.
     internal var disableDataLayerInterceptions: Bool = true
 
     // MARK: - Init
@@ -193,7 +160,5 @@ public struct BambuserCallConfiguration {
         #endif
     }
 
-    /// Safari iOS UA used by default so the embed's browser-detection
-    /// check recognizes the WebKit context as a supported browser.
     internal static let bambuserSafariUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.7 Mobile/21H16 Safari/604.1"
 }
