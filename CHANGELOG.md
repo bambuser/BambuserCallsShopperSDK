@@ -28,6 +28,23 @@ All notable changes to this project will be documented in this file. The format 
 
 
 
+## [1.1.0] - 2026-08-26
+
+[Changed]\
+Unify SwiftUI and UIKit mount paths onto a single `BambuserCallViewController`. `BambuserCallOverlay` is now a `UIViewControllerRepresentable` wrapping the same UIKit VC that `BambuserCallHostView` and `BambuserCallWindowPresenter` use. One `WKWebView`, one JS bridge, one presentation stack, one drag gesture — SwiftUI and UIKit hosts share every fix. Public API preserved verbatim.
+
+[Removed]\
+Internal `EmbedWebView` (SwiftUI `UIViewRepresentable`) — its responsibilities collapsed into `BambuserCallViewController`.
+
+[Added]\
+UIKit adapter: `BambuserCallHostView` (passthrough hit-testing subview) + `PassthroughWindow` + `BambuserCallWindowPresenter` (window-scene overlay). UIKit clients can now embed the SDK without hand-rolling a `UIHostingController` wrapping around `BambuserCallOverlay`.
+
+[Added]\
+Full UIKit demo project (`BambuserCallsShopperUIKitDemo`) mirroring the SwiftUI demo one-to-one.
+
+[Fixed]\
+Widget's back / close X and other top-bar buttons unresponsive when the SDK is embedded in a UIKit host. Root cause: WKWebView's CSS `env(safe-area-inset-*)` resolved to `0` under a plain UIViewController hierarchy — `UIHostingController` propagates the enclosing window's insets to the WebView implicitly, plain UIKit hosts didn't. `BambuserCallViewController` now copies `view.window?.safeAreaInsets` onto the WKWebView's `scrollView.contentInset` in `viewSafeAreaInsetsDidChange` / `viewDidLayoutSubviews` and dispatches a JS `resize` event so the widget re-reads the environment variables. Combined with `viewport-fit=cover` in the embed's meta viewport, both mount surfaces now render the widget's controls below the notch / Dynamic Island where iOS actually delivers touches.
+
 ## [1.0.0] - 2026-08-18
 
 [Added]\

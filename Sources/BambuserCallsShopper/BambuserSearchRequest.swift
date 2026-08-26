@@ -2,14 +2,12 @@
 //  BambuserSearchRequest.swift
 //  BambuserCallsShopper
 //
-//  Payload type for the `provide-search-data` event. The SDK owns
-//  this type because it names the `callbackKey` you must echo back on
-//  the reply — the response shape is yours to model and hand to the
-//  SDK as a `BambuserFactorySpec`.
-//
 
 import Foundation
 
+/// Payload for the `provideSearchData` handler. The SDK owns the
+/// `callbackKey` you must echo back — the response shape is yours to
+/// model and return as a `BambuserFactorySpec`.
 public struct BambuserSearchRequest: Equatable, Sendable {
 
     /// Free-text term the agent typed.
@@ -18,12 +16,11 @@ public struct BambuserSearchRequest: Equatable, Sendable {
     /// 1-indexed page of results the agent is asking for.
     public let page: Int
 
-    /// Opaque callback id. Pass this back verbatim on the reply.
+    /// Opaque callback id. Passed back verbatim on the reply by the SDK.
     public let callbackKey: String
 
-    /// The full unmodified JSON payload from the embed. Access any
-    /// field the SDK doesn't surface as a typed property here —
-    /// including new fields Bambuser adds later.
+    /// Full unmodified JSON payload — read any field the SDK doesn't
+    /// surface as a typed property.
     public let raw: BambuserJSONValue
 
     public init(term: String, page: Int, callbackKey: String, raw: BambuserJSONValue = .null) {
@@ -33,10 +30,8 @@ public struct BambuserSearchRequest: Equatable, Sendable {
         self.raw = raw
     }
 
-    /// Decode a `provide-search-data` payload. Returns `nil` only when
-    /// there is no `callbackId` — without it the SDK can't reply.
-    /// Missing `term` becomes `""`; missing / non-numeric `page`
-    /// becomes `1`.
+    /// Returns `nil` when there is no `callbackId`. Missing `term`
+    /// becomes `""`; missing / non-numeric `page` becomes `1`.
     public static func decode(from payload: BambuserJSONValue) -> BambuserSearchRequest? {
         guard
             case .object(let m) = payload,

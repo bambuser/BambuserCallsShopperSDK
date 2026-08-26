@@ -15,12 +15,8 @@ private let demoOrgId = ""
 /// Change to `.eu` if your workspace is on the EU cluster.
 private let productionEnvironment: BambuserEnvironment = .us
 
-/// Environment the demo actually uses:
-///
-/// - DEBUG builds:   `.stageUS` (Bambuser-internal staging — URL is
-///                   `#if DEBUG`-gated inside the SDK and never lands
-///                   in release binaries).
-/// - Release builds: whatever `productionEnvironment` is set to.
+/// DEBUG builds → `.stageUS` (internal staging, `#if DEBUG`-gated
+/// inside the SDK). Release builds → `productionEnvironment`.
 private var demoEnvironment: BambuserEnvironment {
     #if DEBUG
     return .stageUS
@@ -29,8 +25,7 @@ private var demoEnvironment: BambuserEnvironment {
     #endif
 }
 
-/// `true` once `demoOrgId` has been filled in. The UI uses this to
-/// gate the "Talk to expert" button and show a setup prompt at launch.
+/// `true` once `demoOrgId` has been filled in.
 internal var isBambuserConfigured: Bool {
     !demoOrgId.isEmpty
 }

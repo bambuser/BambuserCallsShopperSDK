@@ -2,56 +2,17 @@
 //  BambuserFactorySpec.swift
 //  BambuserCallsShopper
 //
-//  Data description of a Bambuser embed builder chain, so hosts can drive
-//  any `oneToOneEmbed.someMethod(..., factory => ...)` flow — present or
-//  future — without SDK changes.
-//
-//  Every method call in a Bambuser factory chain is one of three shapes:
-//
-//   • A leaf call with plain arguments:
-//       .currency("USD")
-//   • A call whose last argument is a builder callback:
-//       .product(df => df.name(...).sku(...))
-//   • A call whose last argument is an "items callback" — the embed
-//     hands you a factory, you invoke it once per item and chain from
-//     the result:
-//       .variations(vf => arr.map(v => vf().name(v.name)))
-//       .attributes(a  => arr.map(x => a(x.id).name(...)))
-//
-//  `BambuserFactorySpec` captures the three uniformly. The JS reducer
-//  `window.__bambuserApplyFactorySpec` applies a spec to any factory
-//  handed out by the embed.
-//
-//  Example — reply to a `provide-search-data` request without touching
-//  the SDK:
-//
-//      let spec = BambuserFactorySpec([
-//          .method("products", items: results.map { r in
-//              BambuserFactoryItem(spec: BambuserFactorySpec([
-//                  .method("name",     args: [.string(r.name)]),
-//                  .method("imageUrl", args: [.string(r.image)]),
-//                  .method("sku",      args: [.string(r.sku)]),
-//                  .method("price", factory: BambuserFactorySpec([
-//                      .method("current", args: [.double(r.price)]),
-//                  ])),
-//              ]))
-//          }),
-//          .method("currency", args: [.string("USD")]),
-//          .method("locale",   args: [.string("en-US")]),
-//      ])
-//      controller.replyToCallback(callbackKey: req.callbackKey, factorySpec: spec)
-//
 
 import Foundation
 
-// MARK: - Spec
-
+/// Description of a Bambuser embed builder chain. Every method call
+/// is a leaf (plain args), a nested builder (last arg is a callback),
+/// or an "items callback" (last arg is a factory called once per item).
+/// The JS reducer applies a spec to any factory handed out by the embed.
 public struct BambuserFactorySpec: Codable, Equatable, Sendable {
 
-    /// Ordered list of builder method calls. Empty is legal — the reducer
-    /// returns the factory unchanged, which is useful when an item factory
-    /// is called with args (`attribute(id, optionId)`) and needs no
-    /// further chaining.
+    /// Ordered list of builder method calls. Empty is legal — the
+    /// reducer returns the factory unchanged.
     public let calls: [BambuserFactoryCall]
 
     public init(_ calls: [BambuserFactoryCall] = []) {
@@ -63,19 +24,16 @@ public struct BambuserFactorySpec: Codable, Equatable, Sendable {
 
 public struct BambuserFactoryCall: Codable, Equatable, Sendable {
 
-    /// Name of the builder method to invoke on the current factory.
+    /// Builder method to invoke on the current factory.
     public let method: String
 
-    /// Plain args passed before any callback. Empty when the method only
-    /// takes a builder.
+    /// Plain args passed before any callback.
     public let args: [BambuserJSONValue]
 
-    /// When present, the last argument to `method` is a builder callback:
-    /// `method(...args, f => applySpec(f, factory))`.
+    /// If set, the last argument to `method` is a builder callback.
     public let factory: BambuserFactorySpec?
 
-    /// When present, the last argument to `method` is an "items callback":
-    /// `method(...args, itemFactory => items.map(item => applySpec(itemFactory(...item.factoryArgs), item.spec)))`.
+    /// If set, the last argument to `method` is an "items callback".
     public let items: [BambuserFactoryItem]?
 
     public init(
@@ -123,14 +81,11 @@ public struct BambuserFactoryCall: Codable, Equatable, Sendable {
 
 public struct BambuserFactoryItem: Codable, Equatable, Sendable {
 
-    /// Args to invoke the item factory with. Empty means `itemFactory()`
-    /// (e.g. `variations()`); non-empty means the factory is called with
-    /// values (e.g. `attribute(attributeId, optionId)`).
+    /// Args to invoke the item factory with. Empty means `itemFactory()`;
+    /// non-empty means `factory(...factoryArgs)` (e.g. `attribute(id, optionId)`).
     public let factoryArgs: [BambuserJSONValue]
 
-    /// Chain applied to the value returned by `itemFactory(...factoryArgs)`.
-    /// Empty when the factory call itself is the entire item (e.g.
-    /// `attribute(id, optionId)` with no further chaining).
+    /// Chain applied to the value returned by the item factory.
     public let spec: BambuserFactorySpec
 
     public init(
@@ -225,12 +180,8 @@ extension BambuserJSONValue: ExpressibleByDictionaryLiteral {
 // MARK: - Optional-friendly helpers
 
 public extension BambuserJSONValue {
-    /// `.string(s)` when `s` is non-nil, else `.null`.
     static func string(_ s: String?) -> BambuserJSONValue { s.map { .string($0) } ?? .null }
-    /// `.int(i)` when `i` is non-nil, else `.null`.
-    static func int(_ i: Int?) -> BambuserJSONValue { i.map { .int($0) } ?? .null }
-    /// `.double(d)` when `d` is non-nil, else `.null`.
+    static func int(_ i: Int?)     -> BambuserJSONValue { i.map { .int($0) }     ?? .null }
     static func double(_ d: Double?) -> BambuserJSONValue { d.map { .double($0) } ?? .null }
-    /// `.bool(b)` when `b` is non-nil, else `.null`.
-    static func bool(_ b: Bool?) -> BambuserJSONValue { b.map { .bool($0) } ?? .null }
+    static func bool(_ b: Bool?)   -> BambuserJSONValue { b.map { .bool($0) }   ?? .null }
 }

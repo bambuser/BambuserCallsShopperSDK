@@ -7,8 +7,8 @@ import Foundation
 
 internal enum EmbedHTMLBuilder {
 
-    /// All the knobs the embed constructor accepts, sourced from the
-    /// public `BambuserCallConfiguration` plus per-`show()` overrides.
+    /// Embed constructor options sourced from `BambuserCallConfiguration`
+    /// plus per-`show()` overrides.
     struct Options {
         var orgId: String
         var embedUrl: URL
@@ -36,9 +36,6 @@ internal enum EmbedHTMLBuilder {
         var allowFirstPartyCookies: Bool?
         var disableDataLayerInterceptions: Bool
 
-        /// Which JS `.on(...)` subscriptions to install and whether the
-        /// emitter override should forward non-explicit events. Frozen
-        /// snapshot from the controller's active handlers.
         var subscriptions: BambuserCallSubscriptions
     }
 
@@ -52,7 +49,7 @@ internal enum EmbedHTMLBuilder {
         <!DOCTYPE html>
         <html>
         <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         </head>
         <body>
         <script>
@@ -81,16 +78,14 @@ internal enum EmbedHTMLBuilder {
             });
           }
 
-          // 'close' is always subscribed — the SDK needs it to reset native state.
           oneToOneEmbed.on('close', function() {
             __post('close');
           });
 
         \(onBlocks)
 
-          // Emitter override — always installed. Forwards call-state
-          // events (SDK-internal) and, when catchAllOther is enabled,
-          // any event not explicitly subscribed above.
+          // Emitter override — forwards call-state events plus any
+          // event not explicitly subscribed above (if catchAllOther).
           try {
             var emitter = oneToOneEmbed.events;
             if (emitter && typeof emitter.emit === 'function') {
@@ -184,10 +179,8 @@ internal enum EmbedHTMLBuilder {
         };
 
         // Invoke a stashed callback with a builder that throws — the
-        // documented "verify function" pattern for provide-search-data
-        // and the "we don't sell that" pattern for provide-product-data
-        // when routed via a callback. The embed catches the throw and
-        // shows the message to the agent verbatim.
+        // "verify function" pattern. The embed catches the throw and
+        // shows the message to the agent.
         window.__bambuserApplyToCallbackWithError = function(callbackKey, errorMessage, deleteAfter) {
           var cb = window[callbackKey];
           if (typeof cb !== 'function') {
@@ -199,9 +192,8 @@ internal enum EmbedHTMLBuilder {
               throw new Error(errorMessage || 'error');
             });
           } catch (e) {
-            // The throw inside the builder is the intended path — the
-            // embed catches it. We only reach this catch if the outer
-            // callback itself threw synchronously (unusual).
+            // Outer callback threw synchronously (unusual — the
+            // builder-side throw is the intended path).
             console.error('[bambuser] applyToCallbackWithError sync failure', callbackKey, e);
           }
           if (deleteAfter !== false) {
@@ -209,10 +201,8 @@ internal enum EmbedHTMLBuilder {
           }
         };
 
-        // Call `oneToOneEmbed[method](...primaryArgs, () => { throw ... })`.
-        // The throw inside the callback surfaces the message to the
-        // agent via the embed's own error path — this is the
-        // documented way to signal "product not available" from
+        // `oneToOneEmbed[method](...primaryArgs, () => { throw ... })`
+        // — how the embed surfaces "product not available" from
         // provide-product-data.
         window.__bambuserInvokeEmbedMethodWithError = function(method, primaryArgs, errorMessage) {
           if (!window.oneToOneEmbed || typeof window.oneToOneEmbed[method] !== 'function') {
@@ -248,12 +238,9 @@ internal enum EmbedHTMLBuilder {
           }
         };
 
-        // Report a shopper-driven event to the widget without going
-        // through the dataLayer interceptor. The CUSTOMER_EVENTS
-        // constant map is a runtime property on the embed class, so we
-        // look it up by *name* here — future keys work without an SDK
-        // update. See:
-        // https://gitlab.bambuser.com/livecommerce/one-to-one/liveshopping-one-to-one/-/merge_requests/4697
+        // Report a shopper-driven event to the widget. CUSTOMER_EVENTS
+        // is looked up by name at call time so future keys work
+        // without an SDK update.
         window.__bambuserNotifyCustomerEvent = function(constantName, payload) {
           if (!window.oneToOneEmbed
               || typeof window.oneToOneEmbed.notifyCustomerEvent !== 'function') {
@@ -325,15 +312,12 @@ internal enum EmbedHTMLBuilder {
 
     // MARK: - JS block builders
 
-    /// The `.on(name, ...)` blocks the HTML installs. Delegate-mapped
-    /// events are always installed (the SDK just drops them natively
-    /// if no delegate is set); data-source events are gated on their
-    /// handler being present so the widget doesn't wait 30s for a
-    /// reply that will never come.
+    /// Delegate-mapped events are always installed; data-source
+    /// events are gated on their handler being non-nil.
     private static func buildOnBlocks(subs: BambuserCallSubscriptions) -> String {
         var out: [String] = []
 
-        // -- Fire-and-forget (delegate-mapped) — ALWAYS installed --
+        // Fire-and-forget (delegate-mapped)
 
         out.append("""
           oneToOneEmbed.on('goto-checkout', function(event) {
@@ -345,8 +329,6 @@ internal enum EmbedHTMLBuilder {
             __post('goto-chat');
           });
         """)
-        // The single point every agent-driven navigation passes
-        // through in MANUAL floatingPlayer mode (checkout too).
         out.append("""
           oneToOneEmbed.on('surf-behind-to', function(url) {
             __post('surf-behind-to', { url: url });
@@ -396,7 +378,7 @@ internal enum EmbedHTMLBuilder {
           });
         """)
 
-        // -- Data-source (handler-mapped) — ONLY installed when handler set --
+        // Data-source (handler-mapped) — only when a handler is set
 
         if subs.shouldAddToCart {
             out.append("""
@@ -450,10 +432,8 @@ internal enum EmbedHTMLBuilder {
         return out.joined(separator: "\n")
     }
 
-    /// `handledByCase` map for the emitter override — every event we
-    /// already have an explicit `.on(...)` handler for, so the
-    /// override doesn't double-post it. Delegate-mapped events are
-    /// always explicit; data-source events are conditional.
+    /// Events already handled explicitly via `.on(...)`, so the
+    /// emitter override doesn't double-post them.
     private static func handledByCaseLiteral(subs: BambuserCallSubscriptions) -> String {
         var names: [String] = [
             "close",
@@ -475,7 +455,7 @@ internal enum EmbedHTMLBuilder {
     }
 
     /// Build the `new BambuserOneToOneEmbed({...})` config literal.
-    /// Only present fields are emitted; nils are dropped entirely.
+    /// Nil / empty fields are dropped.
     private static func buildEmbedConfigLiteral(_ o: Options) -> String {
         var fields: [String] = []
         fields.append("orgId: '\(escapeJS(o.orgId))'")

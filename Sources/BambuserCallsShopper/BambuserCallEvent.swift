@@ -2,47 +2,36 @@
 //  BambuserCallEvent.swift
 //  BambuserCallsShopper
 //
-//  Single event stream delivered via
-//  `BambuserCallDelegate.bambuserCall(_:didEmit:)`. Fire-and-forget —
-//  the SDK doesn't need a reply for any of these. Data-source events
-//  (product hydration, search, cart) that DO need a reply live on
-//  `BambuserCallHandlers` instead.
-//
 
 import Foundation
 
+/// Fire-and-forget events delivered via
+/// `BambuserCallDelegate.bambuserCall(_:didEmit:)`. Events that need
+/// a reply (product hydration, search, cart) live on
+/// `BambuserCallHandlers` instead.
 public enum BambuserCallEvent: Sendable {
 
     // MARK: - Lifecycle
 
-    /// The widget was closed (by the user or by `destroy()`). The
-    /// overlay has already been dismissed natively.
+    /// Widget was closed. Overlay has already been dismissed natively.
     case close
 
-    /// Call moved between `.idle` / `.connecting` / `.connected` /
-    /// `.ended`. Also observable via `controller.callState`.
+    /// Call moved between states. Also observable via `controller.callState`.
     case callStateChanged(CallState)
 
-    /// Overlay flipped between full-screen and PiP. `presentation`
-    /// is meaningful only when `isPiP` is true.
+    /// Overlay flipped between full-screen and PiP.
     case presentationChanged(isPiP: Bool, presentation: PipPresentation)
 
     // MARK: - Widget actions
 
-    /// Shopper tapped the checkout button. `cart` is the raw payload
-    /// the embed sent (typically `{ items: [...] }`). If you also
-    /// handle `.navigateTo`, note the widget routes checkout through
-    /// that path (`surf-behind-to`) so this event is mainly useful
-    /// for analytics or side effects.
+    /// Shopper tapped checkout. Widget also routes checkout through
+    /// `.navigateTo`, so this event is mainly for analytics.
     case checkout(cart: BambuserJSONValue)
 
-    /// Shopper picked "I prefer to chat" instead of the call. The
-    /// widget has already closed by the time this fires.
+    /// Shopper picked "I prefer to chat" instead of the call.
     case chatRequested
 
-    /// Agent asked to send the shopper to a URL. The single point
-    /// every agent-driven navigation passes through in MANUAL
-    /// floatingPlayer mode (checkout too). Route into your SwiftUI
+    /// Agent asked to send the shopper to a URL. Route into your
     /// navigation stack.
     case navigateTo(url: URL)
 
@@ -57,11 +46,9 @@ public enum BambuserCallEvent: Sendable {
 
     case trackingEvent(BambuserTrackingEvent)
 
-    // MARK: - Firehose (forward-compat)
+    // MARK: - Firehose
 
     /// Any event the SDK doesn't model explicitly. Only fires when
-    /// `BambuserCallConfiguration.forwardUnknownEmbedEvents == true`
-    /// (default `false`) — installing the emitter override is a
-    /// firehose you opt into.
+    /// `BambuserCallConfiguration.forwardUnknownEmbedEvents == true`.
     case other(name: String, payload: BambuserJSONValue)
 }
