@@ -28,6 +28,14 @@ All notable changes to this project will be documented in this file. The format 
 
 
 
+## [1.2.0] - 2026-09-03
+
+[Changed]\
+`EmbedEventRouter`: `call-starting` and `call-started` now map to `.connected` (previously `.connecting`), matching the moment the agent-side cart tool becomes ready to receive customer events.
+
+[Changed]\
+Demo `BambuserCallBridge.notifyCustomerEvent` payload now carries `name`, `price`, and `currency` alongside `sku`/`quantity` — the embed's `notifyCustomerEvent` public API rejects events missing `name`.
+
 ## [1.1.0] - 2026-08-26
 
 [Changed]\

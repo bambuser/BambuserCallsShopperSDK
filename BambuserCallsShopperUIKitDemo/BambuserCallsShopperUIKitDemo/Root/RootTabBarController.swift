@@ -82,5 +82,15 @@ final class RootTabBarController: UITabBarController {
                 cartNav?.tabBarItem.badgeValue = total == 0 ? nil : String(total)
             }
             .store(in: &cancellables)
+
+        // Hide the tab bar (Products + Cart) while a call is active,
+        // so the shopper stays on whatever page the agent co-browsed
+        // them to — no side-trips out of the flow.
+        bambuserCall.$isVisible
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isVisible in
+                self?.tabBar.isHidden = isVisible
+            }
+            .store(in: &cancellables)
     }
 }

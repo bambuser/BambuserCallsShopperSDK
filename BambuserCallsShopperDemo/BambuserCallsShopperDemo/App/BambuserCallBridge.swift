@@ -128,6 +128,45 @@ final class BambuserCallBridge: BambuserCallDelegate {
         return handlers
     }
 
+    /// On call connect, tell the agent's widget what's already in the
+    /// shopper's local cart. The embed's `notifyCustomerEvent` takes
+    /// one item per call, so we fire once per line. Each payload must
+    /// carry both `sku` and `name` — the embed rejects the event
+    /// otherwise (`fail('requires a non-empty "name"')`).
+    /// No-op when the cart is empty.
+    ///
+    /// Fires only on the `.connected` transition — the widget's cart
+    /// tool doesn't accept events before that.
+    private func syncCartToWidget(controller: BambuserCallController) {
+        let lines = cart.orderedLines
+        guard !lines.isEmpty else { return }
+        print("[BambuserCallBridge] syncCartToWidget: replaying \(lines.count) line(s)")
+        for (product, quantity) in lines {
+            controller.notifyCustomerEvent(
+                "ADDED_TO_CART",
+                payload: .object([
+                    "sku":      .string(product.id),
+                    "name":     .string(product.name),
+                    "price":    .double(product.price),
+                    "currency": .string(product.currency),
+                    "quantity": .int(quantity),
+                ])
+            )
+        }
+    }
+
+    /// Decode a SKU from an agent-supplied product URL. Our demo
+    /// storefront uses `https://…/product/{sku}/{slug}/…`, so the
+    /// SKU is the path segment right after `product`. Adapt to your
+    /// own URL scheme.
+    static func extractSKU(from url: URL) -> String? {
+        let parts = url.pathComponents
+        guard let i = parts.firstIndex(of: "product"),
+              i + 1 < parts.count else { return nil }
+        let sku = parts[i + 1]
+        return sku.isEmpty ? nil : sku
+    }
+
     /// SKU / URL / scanned-code → catalog SKU string. Adapt to your
     /// own URL scheme.
     private static func resolveSKU(from ref: BambuserProductRef) -> String? {
@@ -136,7 +175,10 @@ final class BambuserCallBridge: BambuserCallDelegate {
             return ref.ref.isEmpty ? nil : ref.ref
         case .url:
             guard let url = URL(string: ref.ref) else { return nil }
-            return url.pathComponents.reversed().first(where: { !$0.isEmpty && $0 != "/" })
+            // Prefer the /product/{sku}/... convention; fall back to
+            // the last non-empty path component for other URL shapes.
+            return extractSKU(from: url)
+                ?? url.pathComponents.reversed().first(where: { !$0.isEmpty && $0 != "/" })
         case .unknown:
             return ref.ref.isEmpty ? nil : ref.ref
         }
@@ -151,6 +193,9 @@ final class BambuserCallBridge: BambuserCallDelegate {
 
         case .callStateChanged(let state):
             print("[BambuserCallBridge] callState → \(state)")
+            if state == .connected {
+                syncCartToWidget(controller: controller)
+            }
 
         case .presentationChanged(let isPiP, let presentation):
             print("[BambuserCallBridge] presentation → isPiP=\(isPiP), \(presentation)")
@@ -162,9 +207,21 @@ final class BambuserCallBridge: BambuserCallDelegate {
             print("[BambuserCallBridge] shopper picked chat instead of call")
 
         case .navigateTo(let url):
-            // Push into your router when you wire co-browse into
-            // the shopper's actual navigation stack.
+            // Co-browse: agent tapped a product in their tool. Decode
+            // the SKU from the URL, push the PDP onto our nav stack,
+            // and echo the navigation back to the widget so the
+            // agent's tool stays in sync with what the shopper is on.
             print("[BambuserCallBridge] agent asked to navigate to: \(url)")
+            guard let sku = Self.extractSKU(from: url) else {
+                print("[BambuserCallBridge] could not decode SKU from URL — ignoring")
+                return
+            }
+            guard ProductCatalog.product(for: sku) != nil else {
+                print("[BambuserCallBridge] SKU '\(sku)' not in catalog — ignoring")
+                return
+            }
+            navigation.pushProduct(sku: sku)
+            controller.notifyProductNavigation(externalId: sku)
 
         case .queueOpened(let state):
             print("[BambuserCallBridge] queue open (nextClose=\(state.nextCloseTime as Any))")

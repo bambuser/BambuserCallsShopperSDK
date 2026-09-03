@@ -19,9 +19,9 @@ internal struct EmbedEventRouter {
             let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
             let event = json["event"] as? String
         else { return }
+        print("event, \(event)")
 
         switch event {
-
         // Always subscribed by the SDK
 
         case "close":
@@ -34,10 +34,11 @@ internal struct EmbedEventRouter {
         case "__async-response":
             controller.resolveAsyncInvoke(payload: json["payload"] as? [String: Any])
 
-        case "call-started", "call-starting", "call-connecting", "call-ringing":
+        case "call-connecting", "call-ringing":
             controller.setCallState(.connecting)
 
-        case "call-connected", "call-active", "call-accepted", "connected":
+        case "call-starting", "call-started",
+             "call-connected", "call-active", "call-accepted", "connected":
             controller.setCallState(.connected)
 
         case "call-ended", "call-end", "call-disconnected", "call-rejected",
@@ -213,6 +214,7 @@ internal struct EmbedEventRouter {
             let eventType = json["eventType"] as? String
         else { return }
 
+        print("handleIframeMessage: \(eventType)")
         switch eventType {
         case "viddget:viewport_mode":
             guard let mode = json["data"] as? String else { return }
