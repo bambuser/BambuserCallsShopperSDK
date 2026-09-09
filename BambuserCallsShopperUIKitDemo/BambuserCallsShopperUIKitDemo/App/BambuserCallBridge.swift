@@ -197,6 +197,9 @@ final class BambuserCallBridge: BambuserCallDelegate {
             print("[BambuserCallBridge] presentation → isPiP=\(isPiP), \(presentation)")
 
         case .checkout:
+            // Shrink to a floating mini video player so the shopper
+            // can complete checkout in the app underneath.
+            controller.enterPiP(presentation: .floating)
             navigation.switchTo(.cart)
 
         case .chatRequested:

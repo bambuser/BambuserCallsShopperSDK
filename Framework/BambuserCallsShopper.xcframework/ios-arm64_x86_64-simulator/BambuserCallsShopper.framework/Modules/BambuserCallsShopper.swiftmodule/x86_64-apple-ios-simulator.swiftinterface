@@ -1,0 +1,442 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.3.3 effective-5.10 (swiftlang-6.3.3.1.3 clang-2100.1.1.101)
+// swift-module-flags: -target x86_64-apple-ios16.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name BambuserCallsShopper
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.3
+import Combine
+import Foundation
+import Swift
+import SwiftUI
+import UIKit
+import WebKit
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+import _WebKit_SwiftUI
+public struct BambuserCallConfiguration {
+  public var orgId: Swift.String
+  public var environment: BambuserCallsShopper.BambuserEnvironment
+  public var floatingPipSize: CoreFoundation.CGSize
+  public var isInspectable: Swift.Bool
+  public var autoExpandOnConnect: Swift.Bool
+  public var dismissOnCallEnd: Swift.Bool
+  public var locale: Swift.String?
+  public var initialCustomerData: BambuserCallsShopper.BambuserJSONValue?
+  public var initialTrackingTags: [BambuserCallsShopper.BambuserTrackingTag]
+  public var initialQueue: Swift.String?
+  public var dropInEnabled: Swift.Bool?
+  public var bookingsEnabled: Swift.Bool?
+  public var openBookingPage: Swift.Bool
+  public var bookingServiceIds: [Swift.String]?
+  public var bookingResourceId: Swift.String?
+  public var bookingIframeUrl: Swift.String?
+  public var enableScanning: Swift.Bool
+  public var merchantBaseUrl: Swift.String?
+  public var disableCoBrowsing: Swift.Bool
+  public var themeId: Swift.String?
+  public var allowFirstPartyCookies: Swift.Bool?
+  public var forwardUnknownEmbedEvents: Swift.Bool
+  public init(orgId: Swift.String, environment: BambuserCallsShopper.BambuserEnvironment = .us, floatingPipSize: CoreFoundation.CGSize = BambuserCallConfiguration.defaultFloatingPipSize, isInspectable: Swift.Bool = BambuserCallConfiguration.defaultIsInspectable, autoExpandOnConnect: Swift.Bool = true, dismissOnCallEnd: Swift.Bool = true, locale: Swift.String? = nil, initialCustomerData: BambuserCallsShopper.BambuserJSONValue? = nil, initialTrackingTags: [BambuserCallsShopper.BambuserTrackingTag] = [], initialQueue: Swift.String? = nil, dropInEnabled: Swift.Bool? = nil, bookingsEnabled: Swift.Bool? = nil, openBookingPage: Swift.Bool = false, bookingServiceIds: [Swift.String]? = nil, bookingResourceId: Swift.String? = nil, bookingIframeUrl: Swift.String? = nil, enableScanning: Swift.Bool = false, merchantBaseUrl: Swift.String? = nil, disableCoBrowsing: Swift.Bool = false, themeId: Swift.String? = nil, allowFirstPartyCookies: Swift.Bool? = nil, forwardUnknownEmbedEvents: Swift.Bool = false)
+  public static let defaultFloatingPipSize: CoreFoundation.CGSize
+  public static var defaultIsInspectable: Swift.Bool {
+    get
+  }
+}
+@_Concurrency.MainActor final public class BambuserCallController : Foundation.ObservableObject {
+  @Combine.Published<Swift.Bool> @_projectedValueProperty($isVisible) @_Concurrency.MainActor final public var isVisible: Swift.Bool {
+    get
+  }
+  @_Concurrency.MainActor final public var $isVisible: Combine.Published<Swift.Bool>.Publisher {
+    get
+  }
+  @Combine.Published<Swift.Bool> @_projectedValueProperty($isPiP) @_Concurrency.MainActor final public var isPiP: Swift.Bool {
+    get
+  }
+  @_Concurrency.MainActor final public var $isPiP: Combine.Published<Swift.Bool>.Publisher {
+    get
+  }
+  @Combine.Published<BambuserCallsShopper.PipPresentation> @_projectedValueProperty($pipPresentation) @_Concurrency.MainActor final public var pipPresentation: BambuserCallsShopper.PipPresentation {
+    get
+  }
+  @_Concurrency.MainActor final public var $pipPresentation: Combine.Published<BambuserCallsShopper.PipPresentation>.Publisher {
+    get
+  }
+  @Combine.Published<Swift.String?> @_projectedValueProperty($orgId) @_Concurrency.MainActor final public var orgId: Swift.String? {
+    get
+  }
+  @_Concurrency.MainActor final public var $orgId: Combine.Published<Swift.String?>.Publisher {
+    get
+  }
+  @Combine.Published<BambuserCallsShopper.CallState> @_projectedValueProperty($callState) @_Concurrency.MainActor final public var callState: BambuserCallsShopper.CallState {
+    get
+  }
+  @_Concurrency.MainActor final public var $callState: Combine.Published<BambuserCallsShopper.CallState>.Publisher {
+    get
+  }
+  @Combine.Published<Swift.String?> @_projectedValueProperty($connectId) @_Concurrency.MainActor final public var connectId: Swift.String? {
+    get
+  }
+  @_Concurrency.MainActor final public var $connectId: Combine.Published<Swift.String?>.Publisher {
+    get
+  }
+  @Combine.Published<Swift.String?> @_projectedValueProperty($queue) @_Concurrency.MainActor final public var queue: Swift.String? {
+    get
+  }
+  @_Concurrency.MainActor final public var $queue: Combine.Published<Swift.String?>.Publisher {
+    get
+  }
+  @_Concurrency.MainActor final public let configuration: BambuserCallsShopper.BambuserCallConfiguration
+  @Combine.Published<BambuserCallsShopper.BambuserEnvironment> @_projectedValueProperty($environment) @_Concurrency.MainActor final public var environment: BambuserCallsShopper.BambuserEnvironment {
+    get
+    @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
+    set
+    @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
+    _modify
+  }
+  @_Concurrency.MainActor final public var $environment: Combine.Published<BambuserCallsShopper.BambuserEnvironment>.Publisher {
+    get
+    @available(iOS 14.0, tvOS 14.0, watchOS 7.0, macOS 11.0, *)
+    set
+  }
+  @_Concurrency.MainActor final public var handlers: BambuserCallsShopper.BambuserCallHandlers {
+    get
+    set
+  }
+  @_Concurrency.MainActor weak final public var delegate: (any BambuserCallsShopper.BambuserCallDelegate)?
+  @_Concurrency.MainActor final public var isCallActive: Swift.Bool {
+    get
+  }
+  @_Concurrency.MainActor public init(configuration: BambuserCallsShopper.BambuserCallConfiguration)
+  @_Concurrency.MainActor final public func show(orgId: Swift.String? = nil, connectId: Swift.String? = nil, queue: Swift.String? = nil)
+  @_Concurrency.MainActor final public func close()
+  @_Concurrency.MainActor final public func expand()
+  @_Concurrency.MainActor final public func enterPiP(presentation: BambuserCallsShopper.PipPresentation = .floating)
+  @_Concurrency.MainActor final public func notifyProductNavigation(externalId: Swift.String)
+  @_Concurrency.MainActor final public func invoke(embedMethod: Swift.String, primaryArgs: [BambuserCallsShopper.BambuserJSONValue] = [], factorySpec: BambuserCallsShopper.BambuserFactorySpec? = nil)
+  @_Concurrency.MainActor final public func invoke(callback callbackKey: Swift.String, factorySpec: BambuserCallsShopper.BambuserFactorySpec, deleteAfterUse: Swift.Bool = true)
+  @discardableResult
+  @_Concurrency.MainActor final public func invoke(async embedMethod: Swift.String, primaryArgs: [BambuserCallsShopper.BambuserJSONValue] = []) async throws -> BambuserCallsShopper.BambuserJSONValue
+  @_Concurrency.MainActor final public func provideProductData(bambuserId: Swift.String, factorySpec: BambuserCallsShopper.BambuserFactorySpec)
+  @_Concurrency.MainActor final public func provideProductError(bambuserId: Swift.String, message: Swift.String)
+  @_Concurrency.MainActor final public func provideSearchData(callbackKey: Swift.String, factorySpec: BambuserCallsShopper.BambuserFactorySpec)
+  @_Concurrency.MainActor final public func provideSearchError(callbackKey: Swift.String, message: Swift.String)
+  @_Concurrency.MainActor final public func notifyCustomerEvent(_ eventKey: Swift.String, payload: BambuserCallsShopper.BambuserJSONValue)
+  @_Concurrency.MainActor final public func updateData(_ data: BambuserCallsShopper.BambuserJSONValue? = nil)
+  @_Concurrency.MainActor final public func setTrackingTags(_ tags: [BambuserCallsShopper.BambuserTrackingTag])
+  @_Concurrency.MainActor final public func setQueue(_ queueTerm: Swift.String)
+  @_Concurrency.MainActor final public func areQueuesOpen() async throws -> BambuserCallsShopper.BambuserQueueOpenState
+  @_Concurrency.MainActor final public func getNumberOfOnlineAgents(queue: Swift.String? = nil) async throws -> BambuserCallsShopper.BambuserAgentsOnline
+  @_Concurrency.MainActor final public func getEstimatedWaitingTime(queue: Swift.String? = nil) async throws -> BambuserCallsShopper.BambuserQueueWaitingTime
+  @_Concurrency.MainActor final public func destroy()
+  @_Concurrency.MainActor final public func floatAbove(url: Swift.String? = nil)
+  @_Concurrency.MainActor final public func updateElement(_ element: BambuserCallsShopper.BambuserElement, state: BambuserCallsShopper.BambuserElementState?)
+  @_Concurrency.MainActor final public func notify(callbackKey: Swift.String, info: Any)
+  public typealias ObjectWillChangePublisher = Combine.ObservableObjectPublisher
+  @objc deinit
+}
+public enum BambuserElement : Swift.String, Swift.Sendable, Swift.CaseIterable {
+  case dropInCard
+  case bookingCard
+  public init?(rawValue: Swift.String)
+  public typealias AllCases = [BambuserCallsShopper.BambuserElement]
+  public typealias RawValue = Swift.String
+  nonisolated public static var allCases: [BambuserCallsShopper.BambuserElement] {
+    get
+  }
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public struct BambuserElementState : Swift.Equatable, Swift.Sendable {
+  public var disableCTA: Swift.Bool?
+  public var title: Swift.String?
+  public var subtitle: Swift.String?
+  public var buttonText: Swift.String?
+  public init(disableCTA: Swift.Bool? = nil, title: Swift.String? = nil, subtitle: Swift.String? = nil, buttonText: Swift.String? = nil)
+  public static func == (a: BambuserCallsShopper.BambuserElementState, b: BambuserCallsShopper.BambuserElementState) -> Swift.Bool
+}
+@_Concurrency.MainActor public protocol BambuserCallDelegate : AnyObject {
+  @_Concurrency.MainActor func bambuserCall(_ controller: BambuserCallsShopper.BambuserCallController, didEmit event: BambuserCallsShopper.BambuserCallEvent)
+  @_Concurrency.MainActor func bambuserCall(_ controller: BambuserCallsShopper.BambuserCallController, didEncounter error: BambuserCallsShopper.BambuserCallError)
+}
+extension BambuserCallsShopper.BambuserCallDelegate {
+  @_Concurrency.MainActor public func bambuserCall(_ controller: BambuserCallsShopper.BambuserCallController, didEncounter error: BambuserCallsShopper.BambuserCallError)
+}
+public enum BambuserCallError : Swift.Error {
+  case javaScriptEvaluationFailed(operation: Swift.String, underlying: any Swift.Error)
+  case invalidEventPayload(eventName: Swift.String, reason: Swift.String)
+  case trackingFailed(reason: Swift.String)
+}
+public enum BambuserCallEvent : Swift.Sendable {
+  case close
+  case callStateChanged(BambuserCallsShopper.CallState)
+  case presentationChanged(isPiP: Swift.Bool, presentation: BambuserCallsShopper.PipPresentation)
+  case checkout(cart: BambuserCallsShopper.BambuserJSONValue)
+  case chatRequested
+  case navigateTo(url: Foundation.URL)
+  case queueOpened(BambuserCallsShopper.BambuserQueueOpenState)
+  case queueClosed(BambuserCallsShopper.BambuserQueueOpenState)
+  case agentsOnlineChanged(BambuserCallsShopper.BambuserAgentsOnline)
+  case waitingTimeChanged(BambuserCallsShopper.BambuserQueueWaitingTime)
+  case trackingEvent(BambuserCallsShopper.BambuserTrackingEvent)
+  case other(name: Swift.String, payload: BambuserCallsShopper.BambuserJSONValue)
+}
+public struct BambuserCartIntent : Swift.Equatable, Swift.Sendable {
+  public let sku: Swift.String
+  public let quantity: Swift.Int
+  public let previousQuantity: Swift.Int?
+  public let raw: BambuserCallsShopper.BambuserJSONValue
+  public init(sku: Swift.String, quantity: Swift.Int, previousQuantity: Swift.Int?, raw: BambuserCallsShopper.BambuserJSONValue)
+  public static func == (a: BambuserCallsShopper.BambuserCartIntent, b: BambuserCallsShopper.BambuserCartIntent) -> Swift.Bool
+}
+public enum BambuserReply<Payload> : Swift.Sendable where Payload : Swift.Sendable {
+  case reply(Payload)
+  case error(message: Swift.String)
+  case skip
+}
+extension BambuserCallsShopper.BambuserReply where Payload == BambuserCallsShopper.BambuserJSONValue {
+  public static var success: BambuserCallsShopper.BambuserReply<BambuserCallsShopper.BambuserJSONValue> {
+    get
+  }
+  public static func failure(reason: Swift.String? = nil) -> BambuserCallsShopper.BambuserReply<BambuserCallsShopper.BambuserJSONValue>
+}
+public struct BambuserCallHandlers {
+  public var provideProductData: (@_Concurrency.MainActor (BambuserCallsShopper.BambuserProductRef) async -> BambuserCallsShopper.BambuserReply<BambuserCallsShopper.BambuserFactorySpec>)?
+  public var provideSearchData: (@_Concurrency.MainActor (BambuserCallsShopper.BambuserSearchRequest) async -> BambuserCallsShopper.BambuserReply<BambuserCallsShopper.BambuserFactorySpec>)?
+  public var shouldAddToCart: (@_Concurrency.MainActor (BambuserCallsShopper.BambuserCartIntent) async -> BambuserCallsShopper.BambuserReply<BambuserCallsShopper.BambuserJSONValue>)?
+  public var shouldUpdateCart: (@_Concurrency.MainActor (BambuserCallsShopper.BambuserCartIntent) async -> BambuserCallsShopper.BambuserReply<BambuserCallsShopper.BambuserJSONValue>)?
+  public init()
+}
+@objc @_hasMissingDesignatedInitializers @_Concurrency.MainActor final public class BambuserCallHostView : UIKit.UIView {
+  @_Concurrency.MainActor final public let callViewController: BambuserCallsShopper.BambuserCallViewController
+  @_Concurrency.MainActor public init(controller: BambuserCallsShopper.BambuserCallController)
+  @_Concurrency.MainActor @objc override final public func hitTest(_ point: CoreFoundation.CGPoint, with event: UIKit.UIEvent?) -> UIKit.UIView?
+  @objc deinit
+}
+@_Concurrency.MainActor @preconcurrency public struct BambuserCallOverlay : SwiftUI.UIViewControllerRepresentable {
+  @_Concurrency.MainActor @preconcurrency public init(controller: BambuserCallsShopper.BambuserCallController)
+  @_Concurrency.MainActor @preconcurrency public func makeUIViewController(context: BambuserCallsShopper.BambuserCallOverlay.Context) -> BambuserCallsShopper.BambuserCallViewController
+  @_Concurrency.MainActor @preconcurrency public func updateUIViewController(_ vc: BambuserCallsShopper.BambuserCallViewController, context: BambuserCallsShopper.BambuserCallOverlay.Context)
+  public typealias Body = Swift.Never
+  public typealias Coordinator = Swift.Void
+  public typealias UIViewControllerType = BambuserCallsShopper.BambuserCallViewController
+}
+@objc @_Concurrency.MainActor final public class BambuserCallViewController : UIKit.UIViewController {
+  @_Concurrency.MainActor public init(controller: BambuserCallsShopper.BambuserCallController)
+  @available(*, unavailable)
+  @_Concurrency.MainActor @objc required dynamic public init?(coder: Foundation.NSCoder)
+  @_Concurrency.MainActor @objc override final public func loadView()
+  @_Concurrency.MainActor @objc override final public func viewDidLoad()
+  @objc deinit
+}
+@_Concurrency.MainActor final public class BambuserCallWindowPresenter {
+  @_Concurrency.MainActor final public var window: BambuserCallsShopper.PassthroughWindow? {
+    get
+  }
+  @_Concurrency.MainActor final public var windowLevel: UIKit.UIWindow.Level
+  @_Concurrency.MainActor public init(controller: BambuserCallsShopper.BambuserCallController)
+  @_Concurrency.MainActor final public func attach(to scene: UIKit.UIWindowScene)
+  @_Concurrency.MainActor final public func detach()
+  @objc deinit
+}
+public struct BambuserEnvironment : Swift.Sendable, Swift.Equatable {
+  public let embedURL: Foundation.URL
+  public init(embedURL: Foundation.URL)
+  public static let us: BambuserCallsShopper.BambuserEnvironment
+  public static let eu: BambuserCallsShopper.BambuserEnvironment
+  public static func == (a: BambuserCallsShopper.BambuserEnvironment, b: BambuserCallsShopper.BambuserEnvironment) -> Swift.Bool
+}
+public struct BambuserFactorySpec : Swift.Codable, Swift.Equatable, Swift.Sendable {
+  public let calls: [BambuserCallsShopper.BambuserFactoryCall]
+  public init(_ calls: [BambuserCallsShopper.BambuserFactoryCall] = [])
+  public static func == (a: BambuserCallsShopper.BambuserFactorySpec, b: BambuserCallsShopper.BambuserFactorySpec) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct BambuserFactoryCall : Swift.Codable, Swift.Equatable, Swift.Sendable {
+  public let method: Swift.String
+  public let args: [BambuserCallsShopper.BambuserJSONValue]
+  public let factory: BambuserCallsShopper.BambuserFactorySpec?
+  public let items: [BambuserCallsShopper.BambuserFactoryItem]?
+  public init(method: Swift.String, args: [BambuserCallsShopper.BambuserJSONValue] = [], factory: BambuserCallsShopper.BambuserFactorySpec? = nil, items: [BambuserCallsShopper.BambuserFactoryItem]? = nil)
+  public static func method(_ name: Swift.String, args: [BambuserCallsShopper.BambuserJSONValue] = []) -> BambuserCallsShopper.BambuserFactoryCall
+  public static func method(_ name: Swift.String, args: [BambuserCallsShopper.BambuserJSONValue] = [], factory: BambuserCallsShopper.BambuserFactorySpec) -> BambuserCallsShopper.BambuserFactoryCall
+  public static func method(_ name: Swift.String, args: [BambuserCallsShopper.BambuserJSONValue] = [], items: [BambuserCallsShopper.BambuserFactoryItem]) -> BambuserCallsShopper.BambuserFactoryCall
+  public static func == (a: BambuserCallsShopper.BambuserFactoryCall, b: BambuserCallsShopper.BambuserFactoryCall) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+public struct BambuserFactoryItem : Swift.Codable, Swift.Equatable, Swift.Sendable {
+  public let factoryArgs: [BambuserCallsShopper.BambuserJSONValue]
+  public let spec: BambuserCallsShopper.BambuserFactorySpec
+  public init(factoryArgs: [BambuserCallsShopper.BambuserJSONValue] = [], spec: BambuserCallsShopper.BambuserFactorySpec = .init())
+  public static func == (a: BambuserCallsShopper.BambuserFactoryItem, b: BambuserCallsShopper.BambuserFactoryItem) -> Swift.Bool
+  public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
+}
+indirect public enum BambuserJSONValue : Swift.Sendable, Swift.Equatable {
+  case null
+  case bool(Swift.Bool)
+  case int(Swift.Int)
+  case double(Swift.Double)
+  case string(Swift.String)
+  case array([BambuserCallsShopper.BambuserJSONValue])
+  case object([Swift.String : BambuserCallsShopper.BambuserJSONValue])
+  public static func == (a: BambuserCallsShopper.BambuserJSONValue, b: BambuserCallsShopper.BambuserJSONValue) -> Swift.Bool
+}
+extension BambuserCallsShopper.BambuserJSONValue : Swift.Codable {
+  public init(from decoder: any Swift.Decoder) throws
+  public func encode(to encoder: any Swift.Encoder) throws
+}
+extension BambuserCallsShopper.BambuserJSONValue : Swift.ExpressibleByStringLiteral {
+  public init(stringLiteral value: Swift.String)
+  public typealias ExtendedGraphemeClusterLiteralType = Swift.String
+  public typealias StringLiteralType = Swift.String
+  public typealias UnicodeScalarLiteralType = Swift.String
+}
+extension BambuserCallsShopper.BambuserJSONValue : Swift.ExpressibleByIntegerLiteral {
+  public init(integerLiteral value: Swift.Int)
+  public typealias IntegerLiteralType = Swift.Int
+}
+extension BambuserCallsShopper.BambuserJSONValue : Swift.ExpressibleByFloatLiteral {
+  public init(floatLiteral value: Swift.Double)
+  public typealias FloatLiteralType = Swift.Double
+}
+extension BambuserCallsShopper.BambuserJSONValue : Swift.ExpressibleByBooleanLiteral {
+  public init(booleanLiteral value: Swift.Bool)
+  public typealias BooleanLiteralType = Swift.Bool
+}
+extension BambuserCallsShopper.BambuserJSONValue : Swift.ExpressibleByNilLiteral {
+  public init(nilLiteral: ())
+}
+extension BambuserCallsShopper.BambuserJSONValue : Swift.ExpressibleByArrayLiteral {
+  public init(arrayLiteral elements: BambuserCallsShopper.BambuserJSONValue...)
+  public typealias ArrayLiteralElement = BambuserCallsShopper.BambuserJSONValue
+}
+extension BambuserCallsShopper.BambuserJSONValue : Swift.ExpressibleByDictionaryLiteral {
+  public init(dictionaryLiteral elements: (Swift.String, BambuserCallsShopper.BambuserJSONValue)...)
+  public typealias Key = Swift.String
+  public typealias Value = BambuserCallsShopper.BambuserJSONValue
+}
+extension BambuserCallsShopper.BambuserJSONValue {
+  public static func string(_ s: Swift.String?) -> BambuserCallsShopper.BambuserJSONValue
+  public static func int(_ i: Swift.Int?) -> BambuserCallsShopper.BambuserJSONValue
+  public static func double(_ d: Swift.Double?) -> BambuserCallsShopper.BambuserJSONValue
+  public static func bool(_ b: Swift.Bool?) -> BambuserCallsShopper.BambuserJSONValue
+}
+public struct BambuserProductRef : Swift.Equatable, Swift.Sendable {
+  public enum Kind : Swift.Equatable, Swift.Sendable {
+    case url
+    case scannedCode
+    case productReference
+    case unknown(Swift.String)
+    public init(rawValue: Swift.String)
+    public var rawValue: Swift.String {
+      get
+    }
+    public static func == (a: BambuserCallsShopper.BambuserProductRef.Kind, b: BambuserCallsShopper.BambuserProductRef.Kind) -> Swift.Bool
+  }
+  public let ref: Swift.String
+  public let kind: BambuserCallsShopper.BambuserProductRef.Kind
+  public let bambuserId: Swift.String
+  public let raw: BambuserCallsShopper.BambuserJSONValue
+  public init(ref: Swift.String, kind: BambuserCallsShopper.BambuserProductRef.Kind, bambuserId: Swift.String, raw: BambuserCallsShopper.BambuserJSONValue = .null)
+  public static func decode(from payload: BambuserCallsShopper.BambuserJSONValue) -> [BambuserCallsShopper.BambuserProductRef]
+  public static func == (a: BambuserCallsShopper.BambuserProductRef, b: BambuserCallsShopper.BambuserProductRef) -> Swift.Bool
+}
+public struct BambuserQueueOpenState : Swift.Equatable, Swift.Sendable {
+  public let isOpen: Swift.Bool
+  public let nextOpenTime: Foundation.Date?
+  public let nextCloseTime: Foundation.Date?
+  public let raw: BambuserCallsShopper.BambuserJSONValue
+  public init(isOpen: Swift.Bool, nextOpenTime: Foundation.Date? = nil, nextCloseTime: Foundation.Date? = nil, raw: BambuserCallsShopper.BambuserJSONValue = .null)
+  public static func == (a: BambuserCallsShopper.BambuserQueueOpenState, b: BambuserCallsShopper.BambuserQueueOpenState) -> Swift.Bool
+}
+public struct BambuserAgentsOnline : Swift.Equatable, Swift.Sendable {
+  public let numberOfAgentsOnline: Swift.Int
+  public let queueId: Swift.String?
+  public let raw: BambuserCallsShopper.BambuserJSONValue
+  public init(numberOfAgentsOnline: Swift.Int, queueId: Swift.String? = nil, raw: BambuserCallsShopper.BambuserJSONValue = .null)
+  public static func == (a: BambuserCallsShopper.BambuserAgentsOnline, b: BambuserCallsShopper.BambuserAgentsOnline) -> Swift.Bool
+}
+public struct BambuserQueueWaitingTime : Swift.Equatable, Swift.Sendable {
+  public let estimatedWaitingTime: Swift.Int
+  public let agents: Swift.Int
+  public let place: Swift.Int
+  public let queueId: Swift.String?
+  public let raw: BambuserCallsShopper.BambuserJSONValue
+  public init(estimatedWaitingTime: Swift.Int, agents: Swift.Int, place: Swift.Int, queueId: Swift.String? = nil, raw: BambuserCallsShopper.BambuserJSONValue = .null)
+  public static func == (a: BambuserCallsShopper.BambuserQueueWaitingTime, b: BambuserCallsShopper.BambuserQueueWaitingTime) -> Swift.Bool
+}
+public struct BambuserSearchRequest : Swift.Equatable, Swift.Sendable {
+  public let term: Swift.String
+  public let page: Swift.Int
+  public let callbackKey: Swift.String
+  public let raw: BambuserCallsShopper.BambuserJSONValue
+  public init(term: Swift.String, page: Swift.Int, callbackKey: Swift.String, raw: BambuserCallsShopper.BambuserJSONValue = .null)
+  public static func decode(from payload: BambuserCallsShopper.BambuserJSONValue) -> BambuserCallsShopper.BambuserSearchRequest?
+  public static func == (a: BambuserCallsShopper.BambuserSearchRequest, b: BambuserCallsShopper.BambuserSearchRequest) -> Swift.Bool
+}
+@_Concurrency.MainActor public struct BambuserShopperSDK {
+  @_Concurrency.MainActor public init(environment: BambuserCallsShopper.BambuserEnvironment, orgId: Swift.String)
+  @discardableResult
+  nonisolated public func track(event: Swift.String, with data: [Swift.String : any Swift.Sendable]) async throws -> [Swift.String : any Swift.Sendable]?
+}
+public struct BambuserTrackingEvent : Swift.Equatable, Swift.Sendable {
+  public let eventName: Swift.String?
+  public let eventData: BambuserCallsShopper.BambuserJSONValue?
+  public let ga4Event: Swift.String?
+  public let ga4Ecommerce: BambuserCallsShopper.BambuserJSONValue?
+  public let raw: BambuserCallsShopper.BambuserJSONValue
+  public init(eventName: Swift.String?, eventData: BambuserCallsShopper.BambuserJSONValue?, ga4Event: Swift.String?, ga4Ecommerce: BambuserCallsShopper.BambuserJSONValue?, raw: BambuserCallsShopper.BambuserJSONValue)
+  public static func == (a: BambuserCallsShopper.BambuserTrackingEvent, b: BambuserCallsShopper.BambuserTrackingEvent) -> Swift.Bool
+}
+public struct BambuserTrackingTag : Swift.Equatable, Swift.Sendable {
+  public let key: Swift.String
+  public let value: BambuserCallsShopper.BambuserJSONValue
+  public init(key: Swift.String, value: BambuserCallsShopper.BambuserJSONValue)
+  public init(key: Swift.String, string value: Swift.String)
+  public init(key: Swift.String, number value: Swift.Double)
+  public init(key: Swift.String, bool value: Swift.Bool)
+  public var jsonValue: BambuserCallsShopper.BambuserJSONValue {
+    get
+  }
+  public static func == (a: BambuserCallsShopper.BambuserTrackingTag, b: BambuserCallsShopper.BambuserTrackingTag) -> Swift.Bool
+}
+public enum CallState : Swift.Equatable, Swift.Sendable {
+  case idle
+  case connecting
+  case connected
+  case ended
+  public static func == (a: BambuserCallsShopper.CallState, b: BambuserCallsShopper.CallState) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+@objc @_inheritsConvenienceInitializers @_Concurrency.MainActor final public class PassthroughWindow : UIKit.UIWindow {
+  @_Concurrency.MainActor @objc override final public func hitTest(_ point: CoreFoundation.CGPoint, with event: UIKit.UIEvent?) -> UIKit.UIView?
+  @available(iOS 13.0, *)
+  @_Concurrency.MainActor @objc override dynamic public init(windowScene: UIKit.UIWindowScene)
+  @available(iOS, introduced: 2.0, deprecated: 26.0, message: "Use init(windowScene:) instead.")
+  @_Concurrency.MainActor @objc override dynamic public init(frame: CoreFoundation.CGRect)
+  @_Concurrency.MainActor @objc required dynamic public init?(coder: Foundation.NSCoder)
+  @objc deinit
+}
+public enum PipPresentation : Swift.Equatable, Swift.Sendable {
+  case minimized
+  case floating
+  public static func == (a: BambuserCallsShopper.PipPresentation, b: BambuserCallsShopper.PipPresentation) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+extension BambuserCallsShopper.BambuserCallController : Swift.Sendable {}
+extension BambuserCallsShopper.BambuserElement : Swift.Equatable {}
+extension BambuserCallsShopper.BambuserElement : Swift.Hashable {}
+extension BambuserCallsShopper.BambuserElement : Swift.RawRepresentable {}
+extension BambuserCallsShopper.BambuserCallOverlay : Swift.Sendable {}
+extension BambuserCallsShopper.BambuserCallWindowPresenter : Swift.Sendable {}
+extension BambuserCallsShopper.BambuserShopperSDK : Swift.Sendable {}
+extension BambuserCallsShopper.CallState : Swift.Hashable {}
+extension BambuserCallsShopper.PipPresentation : Swift.Hashable {}

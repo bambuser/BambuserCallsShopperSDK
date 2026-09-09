@@ -15,14 +15,12 @@ private let demoOrgId = ""
 /// Change to `.eu` if your workspace is on the EU cluster.
 private let productionEnvironment: BambuserEnvironment = .us
 
-/// DEBUG builds → `.stageUS` (internal staging, `#if DEBUG`-gated
-/// inside the SDK). Release builds → `productionEnvironment`.
+/// DEBUG builds → `.stageUS` (Bambuser-internal staging). Release
+/// builds → `productionEnvironment`. `Scripts/prepare-release.sh`
+/// scrubs this `#if DEBUG` block out of the staged copy, so the
+/// public consumer never sees `.stageUS`.
 private var demoEnvironment: BambuserEnvironment {
-    #if DEBUG
-    return .stageUS
-    #else
     return productionEnvironment
-    #endif
 }
 
 /// `true` once `demoOrgId` has been filled in.
@@ -32,12 +30,25 @@ internal var isBambuserConfigured: Bool {
 
 // MARK: - App
 
+/// `BambuserShopperSDK` is a struct, so wrap it in an ObservableObject so
+/// SwiftUI's `.environmentObject(...)` plumbing can hand the same instance
+/// to any view that needs to fire tracking events.
+@MainActor
+final class BambuserSDKHolder: ObservableObject {
+    let sdk: BambuserShopperSDK
+
+    init(sdk: BambuserShopperSDK) {
+        self.sdk = sdk
+    }
+}
+
 @main
 struct BambuserCallsShopperDemoApp: App {
 
     @StateObject private var navigation = NavigationCoordinator()
     @StateObject private var cart = CartStore()
     @StateObject private var bambuserCall: BambuserCallController
+    @StateObject private var bambuserSDKHolder: BambuserSDKHolder
 
     @State private var bridge: BambuserCallBridge?
     @State private var showSetupAlert: Bool = !isBambuserConfigured
@@ -49,6 +60,12 @@ struct BambuserCallsShopperDemoApp: App {
                 environment: demoEnvironment
             )
         ))
+        _bambuserSDKHolder = StateObject(wrappedValue: BambuserSDKHolder(
+            sdk: BambuserShopperSDK(
+                environment: demoEnvironment,
+                orgId: demoOrgId
+            )
+        ))
     }
 
     var body: some Scene {
@@ -57,6 +74,7 @@ struct BambuserCallsShopperDemoApp: App {
                 .environmentObject(navigation)
                 .environmentObject(cart)
                 .environmentObject(bambuserCall)
+                .environmentObject(bambuserSDKHolder)
                 .onAppear {
                     guard bridge == nil else { return }
                     // Hold a strong reference — controller.delegate is weak.

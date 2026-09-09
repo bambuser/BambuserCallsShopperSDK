@@ -16,6 +16,7 @@ final class ProductDetailViewController: UIViewController {
     let product: DemoProduct
     private let cart: CartStore
     private let bambuserCall: BambuserCallController
+    private let bambuserSDK: BambuserShopperSDK
 
     private let scrollView   = UIScrollView()
     private let container    = UIStackView()
@@ -23,10 +24,16 @@ final class ProductDetailViewController: UIViewController {
     private let addToCartBtn = UIButton(configuration: .filled())
     private let expertBtn    = UIButton(configuration: .bordered())
 
-    init(product: DemoProduct, cart: CartStore, bambuserCall: BambuserCallController) {
+    init(
+        product: DemoProduct,
+        cart: CartStore,
+        bambuserCall: BambuserCallController,
+        bambuserSDK: BambuserShopperSDK
+    ) {
         self.product = product
         self.cart = cart
         self.bambuserCall = bambuserCall
+        self.bambuserSDK = bambuserSDK
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -134,6 +141,26 @@ final class ProductDetailViewController: UIViewController {
     @objc private func addToCart() {
         cart.add(sku: product.id, quantity: 1)
         refreshAddToCartButton()
+
+        // Fire-and-forget shopper tracking. `track(...)` no-ops silently
+        // when no valid LCTE region exists, so it's safe to call even
+        // outside an active call flow.
+        let sdk = bambuserSDK
+        let product = product
+        Task {
+            try? await sdk.track(
+                event: "add-to-cart",
+                with: [
+                    "products": [[
+                        "id": product.id,
+                        "name": product.name,
+                        "price": product.price,
+                        "currency": product.currency,
+                        "quantity": 1,
+                    ]]
+                ]
+            )
+        }
     }
 
     @objc private func talkToExpert() {

@@ -7,16 +7,15 @@ let package = Package(
         .iOS(.v16),
     ],
     products: [
-        // Primary library — what new dependents should pull in.
         .library(
             name: "BambuserCalls-shopper",
             targets: ["BambuserCallsShopper"]
         ),
     ],
     targets: [
-        .target(
+        .binaryTarget(
             name: "BambuserCallsShopper",
-            path: "Sources/BambuserCallsShopper"
+            path: "Framework/BambuserCallsShopper.xcframework"
         ),
     ]
 )

@@ -11,6 +11,7 @@ struct ProductDetailView: View {
 
     @EnvironmentObject private var cart: CartStore
     @EnvironmentObject private var bambuserCall: BambuserCallController
+    @EnvironmentObject private var bambuserSDKHolder: BambuserSDKHolder
 
     @State private var addedToCart = false
     @State private var showSetupAlert = false
@@ -106,6 +107,25 @@ struct ProductDetailView: View {
             Button {
                 cart.add(sku: product.id, quantity: 1)
                 addedToCart = true
+                // Fire-and-forget tracking event. `track(...)` no-ops
+                // silently when no valid LCTE exists, so it's safe to
+                // call even outside an active call flow.
+                let sdk = bambuserSDKHolder.sdk
+                let product = product
+                Task {
+                    try? await sdk.track(
+                        event: "add-to-cart",
+                        with: [
+                            "products": [[
+                                "id": product.id,
+                                "name": product.name,
+                                "price": product.price,
+                                "currency": product.currency,
+                                "quantity": 1,
+                            ]]
+                        ]
+                    )
+                }
             } label: {
                 Label(
                     addedToCart ? "Added to Cart" : "Add to Cart",

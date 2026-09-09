@@ -21,6 +21,11 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         )
     )
 
+    /// App-scope shopper analytics handle. Independent of the call
+    /// controller — checkout can fire `track(...)` events hours after
+    /// a call ended.
+    private lazy var bambuserSDK: BambuserShopperSDK = DemoConfiguration.makeShopperSDK()
+
     /// Strong reference — `controller.delegate` is weak.
     private var bridge: BambuserCallBridge?
 
@@ -46,7 +51,8 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let root = RootTabBarController(
             navigation: navigation,
             cart: cart,
-            bambuserCall: bambuserCall
+            bambuserCall: bambuserCall,
+            bambuserSDK: bambuserSDK
         )
         main.rootViewController = root
         main.makeKeyAndVisible()

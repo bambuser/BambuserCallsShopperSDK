@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5A423D672FC82BC000FE9144 /* BambuserCalls-shopper in Frameworks */ = {isa = PBXBuildFile; productRef = 5A423D662FC82BC000FE9144 /* BambuserCalls-shopper */; };
+		5A6B16AB30486BD200E4FE36 /* BambuserCalls-shopper in Frameworks */ = {isa = PBXBuildFile; productRef = 5A6B16AA30486BD200E4FE36 /* BambuserCalls-shopper */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5A423D672FC82BC000FE9144 /* BambuserCalls-shopper in Frameworks */,
+				5A6B16AB30486BD200E4FE36 /* BambuserCalls-shopper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +73,7 @@
 			name = BambuserCallsShopperDemo;
 			packageProductDependencies = (
 				5A423D662FC82BC000FE9144 /* BambuserCalls-shopper */,
+				5A6B16AA30486BD200E4FE36 /* BambuserCalls-shopper */,
 			);
 			productName = BambuserCallsShopperDemo;
 			productReference = 5ABAB60A2FB31AD0003355BE /* BambuserCallsShopperDemo.app */;
@@ -101,7 +104,7 @@
 			mainGroup = 5ABAB6012FB31AD0003355BE;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				5A423D652FC82BC000FE9144 /* XCLocalSwiftPackageReference "../../BambuserCallsShopperSDK" */,
+				5A6B16A930486BD200E4FE36 /* XCRemoteSwiftPackageReference "BambuserCallsShopperSDK" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5ABAB60B2FB31AD0003355BE /* Products */;
@@ -330,16 +333,26 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		5A423D652FC82BC000FE9144 /* XCLocalSwiftPackageReference "../../BambuserCallsShopperSDK" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../BambuserCallsShopperSDK;
+/* Begin XCRemoteSwiftPackageReference section */
+		5A6B16A930486BD200E4FE36 /* XCRemoteSwiftPackageReference "BambuserCallsShopperSDK" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/bambuser/BambuserCallsShopperSDK";
+			requirement = {
+				kind = exactVersion;
+				version = "1.3.0";
+			};
 		};
-/* End XCLocalSwiftPackageReference section */
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		5A423D662FC82BC000FE9144 /* BambuserCalls-shopper */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 5A6B16A930486BD200E4FE36 /* XCRemoteSwiftPackageReference "BambuserCallsShopperSDK" */;
+			productName = "BambuserCalls-shopper";
+		};
+		5A6B16AA30486BD200E4FE36 /* BambuserCalls-shopper */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5A6B16A930486BD200E4FE36 /* XCRemoteSwiftPackageReference "BambuserCallsShopperSDK" */;
 			productName = "BambuserCalls-shopper";
 		};
 /* End XCSwiftPackageProductDependency section */

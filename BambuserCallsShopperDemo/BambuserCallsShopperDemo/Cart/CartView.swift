@@ -7,6 +7,11 @@ import SwiftUI
 
 struct CartView: View {
     @EnvironmentObject private var cart: CartStore
+    @EnvironmentObject private var bambuserSDKHolder: BambuserSDKHolder
+
+    @State private var isCheckingOut = false
+    @State private var showSuccess = false
+    @State private var errorMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -19,6 +24,22 @@ struct CartView: View {
             }
             .navigationTitle("Cart")
             .navigationBarTitleDisplayMode(.inline)
+            .alert("Thanks for your order!", isPresented: $showSuccess) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Your purchase was tracked.")
+            }
+            .alert(
+                "Purchase tracking failed",
+                isPresented: Binding(
+                    get: { errorMessage != nil },
+                    set: { if !$0 { errorMessage = nil } }
+                )
+            ) {
+                Button("OK", role: .cancel) { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "")
+            }
         }
     }
 
@@ -60,12 +81,83 @@ struct CartView: View {
                         .font(.headline)
                         .monospacedDigit()
                 }
+
+                Button {
+                    completePurchase()
+                } label: {
+                    HStack {
+                        if isCheckingOut {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                            Text("Completing purchase…")
+                        } else {
+                            Label("Complete purchase", systemImage: "creditcard")
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(isCheckingOut || cart.orderedLines.isEmpty)
+
                 Button {
                     cart.clear()
                 } label: {
                     Label("Empty cart", systemImage: "trash")
                         .foregroundStyle(.red)
                 }
+                .disabled(isCheckingOut)
+            }
+        }
+    }
+
+    private func completePurchase() {
+        let lines = cart.orderedLines
+        guard !lines.isEmpty else { return }
+
+        let subtotal = lines.reduce(0.0) { $0 + $1.product.price * Double($1.quantity) }
+        let currency = lines.first?.product.currency ?? "USD"
+        let transaction: [String: Sendable] = [
+            "id": UUID().uuidString,
+            "currency": currency,
+            "subtotal": subtotal,
+            "total": subtotal,
+            "tax": 0.0,
+            "shippingCost": 0.0,
+        ]
+        let products: [[String: Sendable]] = lines.map { line in
+            var entry: [String: Sendable] = [
+                "id": line.product.id,
+                "name": line.product.name,
+                "price": line.product.price,
+                "currency": line.product.currency,
+                "quantity": line.quantity,
+            ]
+            if !line.product.brand.isEmpty {
+                entry["brand"] = line.product.brand
+            }
+            if !line.product.category.isEmpty {
+                entry["category"] = line.product.category
+            }
+            return entry
+        }
+
+        isCheckingOut = true
+        let sdk = bambuserSDKHolder.sdk
+        Task {
+            do {
+                _ = try await sdk.track(
+                    event: "purchase",
+                    with: [
+                        "transaction": transaction,
+                        "products": products,
+                    ]
+                )
+                isCheckingOut = false
+                cart.clear()
+                showSuccess = true
+            } catch {
+                isCheckingOut = false
+                errorMessage = error.localizedDescription
             }
         }
     }

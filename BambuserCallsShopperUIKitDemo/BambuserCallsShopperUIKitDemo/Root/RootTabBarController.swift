@@ -16,17 +16,20 @@ final class RootTabBarController: UITabBarController {
     let navigation: NavigationCoordinator
     let cart: CartStore
     let bambuserCall: BambuserCallController
+    let bambuserSDK: BambuserShopperSDK
 
     private var cancellables = Set<AnyCancellable>()
 
     init(
         navigation: NavigationCoordinator,
         cart: CartStore,
-        bambuserCall: BambuserCallController
+        bambuserCall: BambuserCallController,
+        bambuserSDK: BambuserShopperSDK
     ) {
         self.navigation = navigation
         self.cart = cart
         self.bambuserCall = bambuserCall
+        self.bambuserSDK = bambuserSDK
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -47,7 +50,8 @@ final class RootTabBarController: UITabBarController {
             let detail = ProductDetailViewController(
                 product: product,
                 cart: self.cart,
-                bambuserCall: self.bambuserCall
+                bambuserCall: self.bambuserCall,
+                bambuserSDK: self.bambuserSDK
             )
             productsList.navigationController?.pushViewController(detail, animated: true)
         }
@@ -59,7 +63,7 @@ final class RootTabBarController: UITabBarController {
         )
 
         // Cart tab.
-        let cartVC = CartViewController(cart: cart)
+        let cartVC = CartViewController(cart: cart, bambuserSDK: bambuserSDK)
         cartVC.title = "Cart"
         let cartNav = UINavigationController(rootViewController: cartVC)
         cartNav.tabBarItem = UITabBarItem(

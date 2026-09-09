@@ -1,107 +1,115 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+All notable changes to this project will be documented in this file. The
+format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Every entry should be marked with one of following tags
-
-- [Added] -- for new additions
-- [Changed] -- for changes in existing functionality/files
-- [Deprecated] -- for soon-to-be removed features
-- [Removed] -- for now removed features/files
-- [Fixed] -- for any bug fixes
-
-### Each entry should follow this format
-
-[TAG]\
-[Title of ticket](https://asana.com/link-to-ticket)
-
-**Example:**\
-[Added]\
-[Introduce Changelog structure for BambuserCallsShopperSDK](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216780112203311)
-
----
-
----
+<!--
+This is the **public**, business-facing changelog that ships to the
+GitHub mirror. Keep entries short, outcome-focused, and free of
+Bambuser-internal terminology. The full technical changelog lives in
+the internal CHANGELOG.md and stays on GitLab.
+-->
 
 ## [Unreleased]
 
 
+## [1.3.0] - 2026-09-09
+
+### Added
+
+- **Shopper analytics.** New `BambuserShopperSDK` entry point with a single `track(event:with:)` method for reporting shopper events (purchase, add-to-cart, refund, and more). Events attribute to the shopper's most recent Video Consultation call — including purchases made hours or days after the call ends.
+- Purchase-tracking demo flow in both SwiftUI and UIKit sample apps.
+
+### Changed
+
+- SDK now ships as a prebuilt XCFramework. Faster consumer builds, smaller integration surface. Xcode 15+ required.
+- Enter Picture-in-Picture (`enterPiP`) now switches the widget itself into its mini video player. Previously the widget kept rendering its cart tool inside the shrunken frame.
+
+### Fixed
+
+- SwiftUI overlay was blocking taps on the tab bar and product list even when the widget wasn't visible. Touches now pass through to the underlying UI.
+- Mini-player drag felt "sticky" on iOS — required a long-press before it followed the finger. Now drags immediately.
+- Chat input was pushed off-screen when the keyboard opened. The WebView now shrinks above the keyboard so inputs stay in view.
+- Mini-player could be dragged off the edge of the screen and disappear. It now stays inside the visible area.
+- Mini-player drag moved opposite to the finger in right-to-left languages (Arabic, Hebrew). Fixed.
+- Widget-initiated Picture-in-Picture transitions (e.g. agent-driven minimize) were being reverted by the SDK. Fixed.
+- Small whitespace/inset regressions in the widget layout after keyboard interactions.
 
 
 ## [1.2.0] - 2026-09-03
 
-[Changed]\
-`EmbedEventRouter`: `call-starting` and `call-started` now map to `.connected` (previously `.connecting`), matching the moment the agent-side cart tool becomes ready to receive customer events.
+### Changed
 
-[Changed]\
-Demo `BambuserCallBridge.notifyCustomerEvent` payload now carries `name`, `price`, and `currency` alongside `sku`/`quantity` — the embed's `notifyCustomerEvent` public API rejects events missing `name`.
+- Call state transitions to "connected" the moment the agent's cart tool is ready to receive customer events (previously it lingered on "connecting"), so host apps can gate cart interactions accurately.
+- Product events sent from the host app now include `name`, `price`, and `currency` alongside `sku`/`quantity`.
+
 
 ## [1.1.0] - 2026-08-26
 
-[Changed]\
-Unify SwiftUI and UIKit mount paths onto a single `BambuserCallViewController`. `BambuserCallOverlay` is now a `UIViewControllerRepresentable` wrapping the same UIKit VC that `BambuserCallHostView` and `BambuserCallWindowPresenter` use. One `WKWebView`, one JS bridge, one presentation stack, one drag gesture — SwiftUI and UIKit hosts share every fix. Public API preserved verbatim.
+### Added
 
-[Removed]\
-Internal `EmbedWebView` (SwiftUI `UIViewRepresentable`) — its responsibilities collapsed into `BambuserCallViewController`.
+- **UIKit support.** Full UIKit integration path with `BambuserCallHostView` and `BambuserCallWindowPresenter`. UIKit apps can now embed the SDK without wrapping SwiftUI.
+- Complete UIKit demo app mirroring the SwiftUI reference demo.
 
-[Added]\
-UIKit adapter: `BambuserCallHostView` (passthrough hit-testing subview) + `PassthroughWindow` + `BambuserCallWindowPresenter` (window-scene overlay). UIKit clients can now embed the SDK without hand-rolling a `UIHostingController` wrapping around `BambuserCallOverlay`.
+### Changed
 
-[Added]\
-Full UIKit demo project (`BambuserCallsShopperUIKitDemo`) mirroring the SwiftUI demo one-to-one.
+- Unified SwiftUI and UIKit under a single presentation layer. Both hosts now share the same WebView, JS bridge, presentation stack, and drag gesture — every future fix lands on both surfaces at once.
 
-[Fixed]\
-Widget's back / close X and other top-bar buttons unresponsive when the SDK is embedded in a UIKit host. Root cause: WKWebView's CSS `env(safe-area-inset-*)` resolved to `0` under a plain UIViewController hierarchy — `UIHostingController` propagates the enclosing window's insets to the WebView implicitly, plain UIKit hosts didn't. `BambuserCallViewController` now copies `view.window?.safeAreaInsets` onto the WKWebView's `scrollView.contentInset` in `viewSafeAreaInsetsDidChange` / `viewDidLayoutSubviews` and dispatches a JS `resize` event so the widget re-reads the environment variables. Combined with `viewport-fit=cover` in the embed's meta viewport, both mount surfaces now render the widget's controls below the notch / Dynamic Island where iOS actually delivers touches.
+### Fixed
+
+- Widget top-bar controls (back / close) unresponsive when embedded in a UIKit host, because `env(safe-area-inset-*)` was resolving to zero. The SDK now propagates safe-area insets into the WebView on both mount surfaces.
+
 
 ## [1.0.0] - 2026-08-18
 
-[Added]\
-[Surface agent-visible error messages from product and search handlers](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1217032281948716)
+First stable release.
 
-[Fixed]\
-[Stability and lifecycle improvements around the WebView bridge](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216955208394291)
+### Added
 
-[Changed]\
-[Refresh documentation and demo app](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216987012903841)
+- Agent-visible error messages surfaced from product and search handlers, so shoppers see contextual failure messages instead of silent errors.
+
+### Changed
+
+- Refreshed documentation and demo app.
+
+### Fixed
+
+- Stability and lifecycle improvements around the WebView bridge.
+
 
 ## [0.3.0] - 2026-08-15
 
-[Changed]\
-[Rework public API to separate data sources from event notifications](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216905447811902)
+### Added
 
-[Changed]\
-[Make the SDK data-shape agnostic so future embed changes don't require a release](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216921334508117)
+- Region selection for the widget backend (US / EU).
 
-[Added]\
-[Introduce region selection for the widget backend](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216940882117566)
+### Changed
+
+- Reworked the public API to separate product data sources from event notifications. Cleaner integration surface, no more mixing "here's the data" with "the shopper did X".
+- Made the SDK data-shape agnostic — future widget-side changes generally won't require an SDK release on the app.
+
 
 ## [0.2.0] - 2026-07-10
 
-[Added]\
-[Expand support for the widget's product and cart flows](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216653290117548)
+### Added
 
-[Added]\
-[Add queue-status observability and query APIs](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216669882203915)
+- Product and cart flows (add-to-cart, cart updates, product detail).
+- Queue-status observability and query APIs.
+- Shopper-activity reporting APIs.
+- Broader configuration surface for the widget.
 
-[Added]\
-[Add shopper-activity reporting APIs](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216687012903214)
+### Changed
 
-[Added]\
-[Broaden configuration surface for the widget](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216735129447712)
+- Internal cleanup and API polish.
 
-[Changed]\
-[Internal cleanup and API polish](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216749208715302)
 
 ## [0.1.0] - 2026-06-01
 
-[Added]\
-[Introduce the Bambuser Calls Shopper SDK for iOS](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216512988207641)
+Initial release of the Bambuser Calls Shopper SDK for iOS.
 
-[Added]\
-[Provide a SwiftUI presentation layer for the widget](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216512988207645)
+### Added
 
-[Added]\
-[Wire native handling for the widget's core events](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216526814520909)
-
-[Added]\
-[Ship a reference demo app](https://app.asana.com/1/186505335887259/project/1207034463437939/task/1216556443190028)
+- SwiftUI presentation layer for the video call widget.
+- Native handling for the widget's core events (call state, product events, queue events).
+- Reference demo app.

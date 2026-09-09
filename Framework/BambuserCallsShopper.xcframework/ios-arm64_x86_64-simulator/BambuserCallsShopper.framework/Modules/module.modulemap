@@ -1,0 +1,3 @@
+framework module BambuserCallsShopper {
+  header "BambuserCallsShopper-Swift.h"
+}

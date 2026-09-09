@@ -50,7 +50,8 @@ final class NavigationCoordinator {
         let detail = ProductDetailViewController(
             product: product,
             cart: root.cart,
-            bambuserCall: root.bambuserCall
+            bambuserCall: root.bambuserCall,
+            bambuserSDK: root.bambuserSDK
         )
         nav.pushViewController(detail, animated: true)
     }

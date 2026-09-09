@@ -9,21 +9,27 @@
 
 import UIKit
 import Combine
+import BambuserCallsShopper
 
 final class CartViewController: UIViewController {
 
     private let cart: CartStore
+    private let bambuserSDK: BambuserShopperSDK
 
     private let tableView    = UITableView(frame: .zero, style: .plain)
     private let footerView   = UIView()
     private let subtotalLabel = UILabel()
     private let emptyLabel   = UILabel()
+    private let checkoutBtn  = UIButton(configuration: .filled())
+    private let spinner      = UIActivityIndicatorView(style: .medium)
 
     private var lines: [(product: DemoProduct, quantity: Int)] = []
     private var cancellables = Set<AnyCancellable>()
+    private var isCheckingOut = false
 
-    init(cart: CartStore) {
+    init(cart: CartStore, bambuserSDK: BambuserShopperSDK) {
         self.cart = cart
+        self.bambuserSDK = bambuserSDK
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -73,14 +79,27 @@ final class CartViewController: UIViewController {
         subtotalTitle.text = "Subtotal"
         subtotalTitle.font = .preferredFont(forTextStyle: .headline)
 
-        let row = UIStackView(arrangedSubviews: [subtotalTitle, subtotalLabel])
-        row.axis = .horizontal
-        row.distribution = .fillEqually
-        row.translatesAutoresizingMaskIntoConstraints = false
+        let subtotalRow = UIStackView(arrangedSubviews: [subtotalTitle, subtotalLabel])
+        subtotalRow.axis = .horizontal
+        subtotalRow.distribution = .fillEqually
+
+        // Complete purchase button.
+        checkoutBtn.setTitle("Complete purchase", for: .normal)
+        checkoutBtn.setImage(UIImage(systemName: "creditcard"), for: .normal)
+        checkoutBtn.addTarget(self, action: #selector(completePurchase), for: .touchUpInside)
+
+        spinner.hidesWhenStopped = true
+
+        let footerStack = UIStackView(arrangedSubviews: [subtotalRow, checkoutBtn])
+        footerStack.axis = .vertical
+        footerStack.spacing = 12
+        footerStack.translatesAutoresizingMaskIntoConstraints = false
 
         footerView.translatesAutoresizingMaskIntoConstraints = false
         footerView.backgroundColor = .secondarySystemBackground
-        footerView.addSubview(row)
+        footerView.addSubview(footerStack)
+        footerView.addSubview(spinner)
+        spinner.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(footerView)
 
         NSLayoutConstraint.activate([
@@ -97,11 +116,14 @@ final class CartViewController: UIViewController {
             footerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             footerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             footerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            footerView.heightAnchor.constraint(equalToConstant: 56),
 
-            row.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: 16),
-            row.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -16),
-            row.centerYAnchor.constraint(equalTo: footerView.centerYAnchor),
+            footerStack.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: 16),
+            footerStack.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -16),
+            footerStack.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 12),
+            footerStack.bottomAnchor.constraint(equalTo: footerView.bottomAnchor, constant: -12),
+
+            spinner.centerYAnchor.constraint(equalTo: checkoutBtn.centerYAnchor),
+            spinner.trailingAnchor.constraint(equalTo: checkoutBtn.trailingAnchor, constant: -16),
         ])
     }
 
@@ -114,11 +136,86 @@ final class CartViewController: UIViewController {
         tableView.isHidden  = lines.isEmpty
         footerView.isHidden = lines.isEmpty
         subtotalLabel.text = String(format: "$%.2f", cart.subtotal)
-        navigationItem.rightBarButtonItem?.isEnabled = !lines.isEmpty
+        navigationItem.rightBarButtonItem?.isEnabled = !lines.isEmpty && !isCheckingOut
+        checkoutBtn.isEnabled = !lines.isEmpty && !isCheckingOut
     }
 
     @objc private func emptyCart() {
         cart.clear()
+    }
+
+    @objc private func completePurchase() {
+        let currentLines = cart.orderedLines
+        guard !currentLines.isEmpty, !isCheckingOut else { return }
+
+        let subtotal = currentLines.reduce(0.0) { $0 + $1.product.price * Double($1.quantity) }
+        let currency = currentLines.first?.product.currency ?? "USD"
+        let transaction: [String: Sendable] = [
+            "id": UUID().uuidString,
+            "currency": currency,
+            "subtotal": subtotal,
+            "total": subtotal,
+            "tax": 0.0,
+            "shippingCost": 0.0,
+        ]
+        let products: [[String: Sendable]] = currentLines.map { line in
+            var entry: [String: Sendable] = [
+                "id": line.product.id,
+                "name": line.product.name,
+                "price": line.product.price,
+                "currency": line.product.currency,
+                "quantity": line.quantity,
+            ]
+            if !line.product.brand.isEmpty {
+                entry["brand"] = line.product.brand
+            }
+            if !line.product.category.isEmpty {
+                entry["category"] = line.product.category
+            }
+            return entry
+        }
+
+        setCheckingOut(true)
+        let sdk = bambuserSDK
+        Task { @MainActor in
+            do {
+                _ = try await sdk.track(
+                    event: "purchase",
+                    with: [
+                        "transaction": transaction,
+                        "products": products,
+                    ]
+                )
+                setCheckingOut(false)
+                cart.clear()
+                presentAlert(title: "Thanks for your order!", message: "Your purchase was tracked.")
+            } catch {
+                setCheckingOut(false)
+                presentAlert(
+                    title: "Purchase tracking failed",
+                    message: error.localizedDescription
+                )
+            }
+        }
+    }
+
+    private func setCheckingOut(_ inFlight: Bool) {
+        isCheckingOut = inFlight
+        if inFlight {
+            spinner.startAnimating()
+            checkoutBtn.setTitle("Completing purchase…", for: .normal)
+        } else {
+            spinner.stopAnimating()
+            checkoutBtn.setTitle("Complete purchase", for: .normal)
+        }
+        checkoutBtn.isEnabled = !inFlight && !lines.isEmpty
+        navigationItem.rightBarButtonItem?.isEnabled = !inFlight && !lines.isEmpty
+    }
+
+    private func presentAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+        present(alert, animated: true)
     }
 }
 
