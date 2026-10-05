@@ -11,6 +11,9 @@ DerivedData/
 # Swift Package Manager
 # ============================================================
 .build/
+# build-xcframework.sh output
+Framework/
+BambuserCallsShopperSDK-Project/*.xcodeproj/
 .swiftpm/
 Package.resolved
 

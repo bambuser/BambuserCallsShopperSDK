@@ -14,6 +14,31 @@ the internal CHANGELOG.md and stays on GitLab.
 ## [Unreleased]
 
 
+
+
+## [1.4.0] - 2026-10-05
+
+### Added
+
+- **`BambuserCallController.updateLocale(_:)`** — change the widget's locale between calls without reconstructing the controller. Useful when your app supports language switching mid-session. The new value applies to the next call `.show()`; running calls keep the locale they were opened with. Pass `nil` to fall back to the merchant's default.
+- **`BambuserPinWidget`** — persistent floating pin overlay that opens the full Calls Widget on tap. Drop `BambuserPinWidgetView` at your app's root and the pin follows the shopper across every screen. Two rendering modes selected by `BambuserPinWidgetConfiguration.content`:
+  - `.bambuserWidget(...)` — renders the Bambuser widget's own Overlay Widget inside a WKWebView. Content driven by your BamHub theme.
+  - `.custom(...)` — a native SwiftUI card with host-provided content. Three variants (`.avatar`, `.video`, `.imageWithText`) and preset sizes (`.small` / `.medium` / `.large` / `.custom`). Draggable, dismissible, no WebView needed.
+
+  State transitions surface via `BambuserPinWidgetDelegate` for full host visibility.
+- **`BambuserPinWidgetCallAdapter`** — one-liner wiring between the pin and your existing `BambuserCallController`. Automatically hands off from pin → full call when the shopper taps, and restores the pin when the call ends. Only one WebView is alive at a time. A call opened any other way also hides the pin while it runs.
+- **`BambuserPinWidgetWindowPresenter`** — show the pin in UIKit apps on its own window, same pattern as `BambuserCallWindowPresenter`.
+- **`BambuserCallError.audioSessionActivationFailed(underlying:)`** — reported when the audio session can't be reactivated after an interruption. If you `switch` over `BambuserCallError`, add `@unknown default:`.
+
+### Changed
+
+- Shopper tracking events now report `source: "clienteling-sdk"` (previously `"call"`).
+
+### Fixed
+
+- **Audio / video restored after a cellular call or Siri interrupts a Bambuser call.** Previously the call session stayed connected at the app layer but the microphone and camera went dead on resume. The SDK now reactivates the shared audio session on interruption end so WebRTC can reclaim the input hardware.
+- The full-screen call reaches the bottom edge of the screen on iOS 17+. SwiftUI apps should mount `BambuserCallOverlay` with `.ignoresSafeArea(edges: .bottom)`.
+
 ## [1.3.0] - 2026-09-09
 
 ### Added

@@ -37,6 +37,20 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private var overlayHostView:  BambuserCallHostView?
     private let useOverlayWindow = true
 
+    /// Persistent pin on its own window; the adapter hands off to the
+    /// call and brings the pin back when the call ends.
+    private lazy var pin = BambuserPinWidget(
+        configuration: BambuserPinWidgetConfiguration(
+            orgId: DemoConfiguration.orgId,
+            environment: DemoConfiguration.environment,
+            content: .bambuserWidget(
+                BambuserPinWidgetBambuserOptions(variantOverride: .video, popupTimeoutSeconds: 5)
+            )
+        )
+    )
+    private var pinPresenter: BambuserPinWidgetWindowPresenter?
+    private var pinAdapter: BambuserPinWidgetCallAdapter?
+
     // MARK: - UIWindowSceneDelegate
 
     func scene(
@@ -85,7 +99,16 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             self.overlayHostView = host
         }
 
-        // 4. Setup-alert if the demo hasn't been configured yet.
+        // 4. Pin widget.
+        if DemoConfiguration.isConfigured {
+            let presenter = BambuserPinWidgetWindowPresenter(pin: pin)
+            presenter.attach(to: windowScene)
+            pinPresenter = presenter
+            pinAdapter = BambuserPinWidgetCallAdapter(pin: pin, call: bambuserCall)
+            pin.present()
+        }
+
+        // 5. Setup-alert if the demo hasn't been configured yet.
         if !DemoConfiguration.isConfigured {
             DispatchQueue.main.async { [weak self] in
                 self?.presentSetupAlert()
@@ -96,6 +119,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidDisconnect(_ scene: UIScene) {
         overlayPresenter?.detach()
         overlayPresenter = nil
+        pinPresenter?.detach()
+        pinPresenter = nil
+        pinAdapter = nil
     }
 
     private func presentSetupAlert() {

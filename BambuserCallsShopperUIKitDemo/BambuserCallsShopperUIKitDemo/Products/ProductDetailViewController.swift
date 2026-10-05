@@ -174,6 +174,29 @@ final class ProductDetailViewController: UIViewController {
             present(alert, animated: true)
             return
         }
-        bambuserCall.show()
+        // Request camera + mic upfront so the OS popup lands on this
+        // screen rather than mid-widget-load.
+        Task { @MainActor in
+            if await MediaPermissions.request() {
+                bambuserCall.show()
+            } else {
+                presentPermissionsAlert()
+            }
+        }
+    }
+
+    private func presentPermissionsAlert() {
+        let alert = UIAlertController(
+            title: "Camera & microphone access needed",
+            message: "Enable camera and microphone in Settings to start a video call.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Open Settings", style: .default) { _ in
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(alert, animated: true)
     }
 }

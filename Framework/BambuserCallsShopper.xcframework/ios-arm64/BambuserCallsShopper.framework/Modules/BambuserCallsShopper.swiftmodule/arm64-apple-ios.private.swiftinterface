@@ -2,12 +2,16 @@
 // swift-compiler-version: Apple Swift version 6.3.3 effective-5.10 (swiftlang-6.3.3.1.3 clang-2100.1.1.101)
 // swift-module-flags: -target arm64-apple-ios16.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name BambuserCallsShopper
 // swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.3
+import AVFoundation
+import AVKit
 import Combine
+import CoreGraphics
 import Foundation
 import Swift
 import SwiftUI
 import UIKit
 import WebKit
+import _AVKit_SwiftUI
 import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
@@ -84,6 +88,12 @@ public struct BambuserCallConfiguration {
   @_Concurrency.MainActor final public var $queue: Combine.Published<Swift.String?>.Publisher {
     get
   }
+  @Combine.Published<Swift.String?> @_projectedValueProperty($locale) @_Concurrency.MainActor final public var locale: Swift.String? {
+    get
+  }
+  @_Concurrency.MainActor final public var $locale: Combine.Published<Swift.String?>.Publisher {
+    get
+  }
   @_Concurrency.MainActor final public let configuration: BambuserCallsShopper.BambuserCallConfiguration
   @Combine.Published<BambuserCallsShopper.BambuserEnvironment> @_projectedValueProperty($environment) @_Concurrency.MainActor final public var environment: BambuserCallsShopper.BambuserEnvironment {
     get
@@ -123,6 +133,7 @@ public struct BambuserCallConfiguration {
   @_Concurrency.MainActor final public func updateData(_ data: BambuserCallsShopper.BambuserJSONValue? = nil)
   @_Concurrency.MainActor final public func setTrackingTags(_ tags: [BambuserCallsShopper.BambuserTrackingTag])
   @_Concurrency.MainActor final public func setQueue(_ queueTerm: Swift.String)
+  @_Concurrency.MainActor final public func updateLocale(_ locale: Swift.String?)
   @_Concurrency.MainActor final public func areQueuesOpen() async throws -> BambuserCallsShopper.BambuserQueueOpenState
   @_Concurrency.MainActor final public func getNumberOfOnlineAgents(queue: Swift.String? = nil) async throws -> BambuserCallsShopper.BambuserAgentsOnline
   @_Concurrency.MainActor final public func getEstimatedWaitingTime(queue: Swift.String? = nil) async throws -> BambuserCallsShopper.BambuserQueueWaitingTime
@@ -165,6 +176,7 @@ public enum BambuserCallError : Swift.Error {
   case javaScriptEvaluationFailed(operation: Swift.String, underlying: any Swift.Error)
   case invalidEventPayload(eventName: Swift.String, reason: Swift.String)
   case trackingFailed(reason: Swift.String)
+  case audioSessionActivationFailed(underlying: any Swift.Error)
 }
 public enum BambuserCallEvent : Swift.Sendable {
   case close
@@ -323,6 +335,118 @@ extension BambuserCallsShopper.BambuserJSONValue {
   public static func double(_ d: Swift.Double?) -> BambuserCallsShopper.BambuserJSONValue
   public static func bool(_ b: Swift.Bool?) -> BambuserCallsShopper.BambuserJSONValue
 }
+@_Concurrency.MainActor final public class BambuserPinWidget : Combine.ObservableObject {
+  @_Concurrency.MainActor final public let configuration: BambuserCallsShopper.BambuserPinWidgetConfiguration
+  @_Concurrency.MainActor weak final public var delegate: (any BambuserCallsShopper.BambuserPinWidgetDelegate)?
+  @Combine.Published<BambuserCallsShopper.BambuserPinWidgetState> @_projectedValueProperty($state) @_Concurrency.MainActor final public var state: BambuserCallsShopper.BambuserPinWidgetState {
+    get
+  }
+  @_Concurrency.MainActor final public var $state: Combine.Published<BambuserCallsShopper.BambuserPinWidgetState>.Publisher {
+    get
+  }
+  @_Concurrency.MainActor public init(configuration: BambuserCallsShopper.BambuserPinWidgetConfiguration)
+  @_Concurrency.MainActor final public func present()
+  @_Concurrency.MainActor final public func dismiss()
+  public typealias ObjectWillChangePublisher = Combine.ObservableObjectPublisher
+  @objc deinit
+}
+@_Concurrency.MainActor final public class BambuserPinWidgetCallAdapter : BambuserCallsShopper.BambuserPinWidgetDelegate {
+  @_Concurrency.MainActor final public var representAfterCallEnds: Swift.Bool
+  @_Concurrency.MainActor public init(pin: BambuserCallsShopper.BambuserPinWidget, call: BambuserCallsShopper.BambuserCallController, representAfterCallEnds: Swift.Bool = true)
+  @objc deinit
+  @_Concurrency.MainActor final public func pinWidget(_ pin: BambuserCallsShopper.BambuserPinWidget, didChangeState from: BambuserCallsShopper.BambuserPinWidgetState, to next: BambuserCallsShopper.BambuserPinWidgetState)
+  @_Concurrency.MainActor final public func pinWidgetDidRequestOpenCall(_ pin: BambuserCallsShopper.BambuserPinWidget)
+  @_Concurrency.MainActor final public func pinWidgetDidDismiss(_ pin: BambuserCallsShopper.BambuserPinWidget)
+}
+public struct BambuserPinWidgetConfiguration {
+  public var orgId: Swift.String
+  public var environment: BambuserCallsShopper.BambuserEnvironment
+  public var content: BambuserCallsShopper.BambuserPinWidgetContent
+  public var locale: Swift.String?
+  public var isInspectable: Swift.Bool
+  public init(orgId: Swift.String, environment: BambuserCallsShopper.BambuserEnvironment, content: BambuserCallsShopper.BambuserPinWidgetContent, locale: Swift.String? = nil, isInspectable: Swift.Bool = false)
+}
+public enum BambuserPinWidgetContent {
+  case bambuserWidget(BambuserCallsShopper.BambuserPinWidgetBambuserOptions)
+  case custom(BambuserCallsShopper.BambuserPinWidgetCustomOptions)
+}
+public struct BambuserPinWidgetBambuserOptions {
+  public var variantOverride: BambuserCallsShopper.BambuserPinWidgetVariant?
+  public var popupTimeoutSeconds: Foundation.TimeInterval?
+  public init(variantOverride: BambuserCallsShopper.BambuserPinWidgetVariant? = nil, popupTimeoutSeconds: Foundation.TimeInterval? = nil)
+}
+public enum BambuserPinWidgetVariant : Swift.String, Swift.Sendable {
+  case avatar
+  case sideDock
+  case video
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+public struct BambuserPinWidgetCustomOptions {
+  public var variant: BambuserCallsShopper.BambuserPinWidgetCustomVariant
+  public var size: BambuserCallsShopper.BambuserPinWidgetSize
+  public var popupTimeoutSeconds: Foundation.TimeInterval
+  public var position: BambuserCallsShopper.BambuserPinWidgetAnchor
+  public var padding: SwiftUICore.EdgeInsets
+  public var isDismissible: Swift.Bool
+  public init(variant: BambuserCallsShopper.BambuserPinWidgetCustomVariant, size: BambuserCallsShopper.BambuserPinWidgetSize = .medium, popupTimeoutSeconds: Foundation.TimeInterval = 5, position: BambuserCallsShopper.BambuserPinWidgetAnchor = .bottomTrailing, padding: SwiftUICore.EdgeInsets = EdgeInsets(top: 0, leading: 0, bottom: 24, trailing: 16), isDismissible: Swift.Bool = true)
+}
+public enum BambuserPinWidgetSize {
+  case small
+  case medium
+  case large
+  case custom(width: CoreFoundation.CGFloat, height: CoreFoundation.CGFloat)
+  public var dimensions: CoreFoundation.CGSize {
+    get
+  }
+}
+public enum BambuserPinWidgetCustomVariant {
+  case avatar(image: SwiftUICore.Image, title: Swift.String, subtitle: Swift.String)
+  case video(url: Foundation.URL, title: Swift.String, ctaTitle: Swift.String)
+  case imageWithText(image: SwiftUICore.Image, title: Swift.String, subtitle: Swift.String, ctaTitle: Swift.String)
+}
+@_Concurrency.MainActor public protocol BambuserPinWidgetDelegate : AnyObject {
+  @_Concurrency.MainActor func pinWidget(_ pin: BambuserCallsShopper.BambuserPinWidget, didChangeState from: BambuserCallsShopper.BambuserPinWidgetState, to next: BambuserCallsShopper.BambuserPinWidgetState)
+  @_Concurrency.MainActor func pinWidgetDidRequestOpenCall(_ pin: BambuserCallsShopper.BambuserPinWidget)
+  @_Concurrency.MainActor func pinWidgetDidDismiss(_ pin: BambuserCallsShopper.BambuserPinWidget)
+}
+extension BambuserCallsShopper.BambuserPinWidgetDelegate {
+  @_Concurrency.MainActor public func pinWidget(_ pin: BambuserCallsShopper.BambuserPinWidget, didChangeState from: BambuserCallsShopper.BambuserPinWidgetState, to next: BambuserCallsShopper.BambuserPinWidgetState)
+  @_Concurrency.MainActor public func pinWidgetDidRequestOpenCall(_ pin: BambuserCallsShopper.BambuserPinWidget)
+  @_Concurrency.MainActor public func pinWidgetDidDismiss(_ pin: BambuserCallsShopper.BambuserPinWidget)
+}
+public enum BambuserPinWidgetState : Swift.Equatable, Swift.Sendable {
+  case idle
+  case overlayWidget
+  case overlayWidgetMaximised
+  case pendingCall
+  case dismissed
+  public static func == (a: BambuserCallsShopper.BambuserPinWidgetState, b: BambuserCallsShopper.BambuserPinWidgetState) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+@_Concurrency.MainActor @preconcurrency public struct BambuserPinWidgetView : SwiftUICore.View {
+  @_Concurrency.MainActor @preconcurrency public init(pin: BambuserCallsShopper.BambuserPinWidget)
+  @_Concurrency.MainActor @preconcurrency public var body: some SwiftUICore.View {
+    get
+  }
+  public typealias Body = @_opaqueReturnTypeOf("$s20BambuserCallsShopper0A13PinWidgetViewV4bodyQrvp", 0) __
+}
+@_Concurrency.MainActor final public class BambuserPinWidgetWindowPresenter {
+  @_Concurrency.MainActor final public var window: UIKit.UIWindow? {
+    get
+  }
+  @_Concurrency.MainActor final public var windowLevel: UIKit.UIWindow.Level
+  @_Concurrency.MainActor public init(pin: BambuserCallsShopper.BambuserPinWidget)
+  @_Concurrency.MainActor final public func attach(to scene: UIKit.UIWindowScene)
+  @_Concurrency.MainActor final public func detach()
+  @objc deinit
+}
 public struct BambuserProductRef : Swift.Equatable, Swift.Sendable {
   public enum Kind : Swift.Equatable, Swift.Sendable {
     case url
@@ -415,12 +539,22 @@ public enum CallState : Swift.Equatable, Swift.Sendable {
 }
 @objc @_inheritsConvenienceInitializers @_Concurrency.MainActor final public class PassthroughWindow : UIKit.UIWindow {
   @_Concurrency.MainActor @objc override final public func hitTest(_ point: CoreFoundation.CGPoint, with event: UIKit.UIEvent?) -> UIKit.UIView?
+  @_Concurrency.MainActor @objc override final public func sendEvent(_ event: UIKit.UIEvent)
   @available(iOS 13.0, *)
   @_Concurrency.MainActor @objc override dynamic public init(windowScene: UIKit.UIWindowScene)
   @available(iOS, introduced: 2.0, deprecated: 26.0, message: "Use init(windowScene:) instead.")
   @_Concurrency.MainActor @objc override dynamic public init(frame: CoreFoundation.CGRect)
   @_Concurrency.MainActor @objc required dynamic public init?(coder: Foundation.NSCoder)
   @objc deinit
+}
+public enum BambuserPinWidgetAnchor {
+  case bottomLeading
+  case bottomTrailing
+  public static func == (a: BambuserCallsShopper.BambuserPinWidgetAnchor, b: BambuserCallsShopper.BambuserPinWidgetAnchor) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
 }
 public enum PipPresentation : Swift.Equatable, Swift.Sendable {
   case minimized
@@ -437,6 +571,16 @@ extension BambuserCallsShopper.BambuserElement : Swift.Hashable {}
 extension BambuserCallsShopper.BambuserElement : Swift.RawRepresentable {}
 extension BambuserCallsShopper.BambuserCallOverlay : Swift.Sendable {}
 extension BambuserCallsShopper.BambuserCallWindowPresenter : Swift.Sendable {}
+extension BambuserCallsShopper.BambuserPinWidget : Swift.Sendable {}
+extension BambuserCallsShopper.BambuserPinWidgetCallAdapter : Swift.Sendable {}
+extension BambuserCallsShopper.BambuserPinWidgetVariant : Swift.Equatable {}
+extension BambuserCallsShopper.BambuserPinWidgetVariant : Swift.Hashable {}
+extension BambuserCallsShopper.BambuserPinWidgetVariant : Swift.RawRepresentable {}
+extension BambuserCallsShopper.BambuserPinWidgetState : Swift.Hashable {}
+extension BambuserCallsShopper.BambuserPinWidgetView : Swift.Sendable {}
+extension BambuserCallsShopper.BambuserPinWidgetWindowPresenter : Swift.Sendable {}
 extension BambuserCallsShopper.BambuserShopperSDK : Swift.Sendable {}
 extension BambuserCallsShopper.CallState : Swift.Hashable {}
+extension BambuserCallsShopper.BambuserPinWidgetAnchor : Swift.Equatable {}
+extension BambuserCallsShopper.BambuserPinWidgetAnchor : Swift.Hashable {}
 extension BambuserCallsShopper.PipPresentation : Swift.Hashable {}
