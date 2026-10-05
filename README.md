@@ -54,6 +54,7 @@ struct MyApp: App {
             ZStack {
                 MyShoppingApp()
                 BambuserCallOverlay(controller: call)   // drop at the root
+                    .ignoresSafeArea(edges: .bottom)    // full-bleed bottom
             }
             .onAppear {
                 guard delegate == nil else { return }
@@ -85,6 +86,58 @@ Kick off a call:
 ```swift
 call.show(connectId: "abc", queue: "premium")
 ```
+
+## Persistent pin widget (optional)
+
+`BambuserPinWidget` renders a persistent floating pin on top of your app that opens the full call when tapped. Two modes:
+
+- `.bambuserWidget(...)` — the Bambuser widget's own Overlay Widget inside a WKWebView (BamHub theme drives the visuals)
+- `.custom(...)` — a native SwiftUI card with host-provided image / video + text (three variants: `.avatar`, `.video`, `.imageWithText`)
+
+```swift
+@StateObject private var pin = BambuserPinWidget(
+    configuration: BambuserPinWidgetConfiguration(
+        orgId: "YOUR_ORG_ID",
+        environment: .us,
+        content: .custom(
+            BambuserPinWidgetCustomOptions(
+                variant: .video(
+                    url: Bundle.main.url(forResource: "welcome", withExtension: "mp4")!,
+                    title: "Meet our experts",
+                    ctaTitle: "Start a call"
+                ),
+                size: .medium,                 // .small / .medium / .large / .custom
+                popupTimeoutSeconds: 5
+            )
+        )
+    )
+)
+@State private var adapter: BambuserPinWidgetCallAdapter?
+
+// In your view tree:
+BambuserPinWidgetView(pin: pin)
+
+.onAppear {
+    if adapter == nil {
+        adapter = BambuserPinWidgetCallAdapter(pin: pin, call: bambuserCall)
+    }
+    pin.present()
+}
+```
+
+The adapter enforces the single-WebView invariant: on tap it dismisses the pin, calls `bambuserCall.show()`, and re-presents the pin when the call closes.
+
+See `video-consultation/mobile-sdk/ios/pin-widget` in the docs for the full API surface.
+
+## Locale and errors
+
+Change the widget language between calls (applied on the next `show()`):
+
+```swift
+bambuserCall.updateLocale("de-DE")   // nil = BamHub default
+```
+
+Errors arrive in `bambuserCall(_:didEncounter:)` as `BambuserCallError`: `javaScriptEvaluationFailed`, `invalidEventPayload`, `trackingFailed`, `audioSessionActivationFailed`. After a phone call or Siri interrupts a live call, the SDK reactivates the shared audio session so mic and camera recover; `audioSessionActivationFailed` reports when that fails. Add `@unknown default:` when switching over the enum.
 
 ## Repository layout
 

@@ -408,6 +408,7 @@ SWIFT_CLASS("_TtC20BambuserCallsShopper26BambuserCallViewController")
 SWIFT_CLASS("_TtC20BambuserCallsShopper17PassthroughWindow")
 @interface PassthroughWindow : UIWindow
 - (UIView * _Nullable)hitTest:(CGPoint)point withEvent:(UIEvent * _Nullable)event SWIFT_WARN_UNUSED_RESULT;
+- (void)sendEvent:(UIEvent * _Nonnull)event;
 - (nonnull instancetype)initWithWindowScene:(UIWindowScene * _Nonnull)windowScene OBJC_DESIGNATED_INITIALIZER SWIFT_AVAILABILITY(ios,introduced=13.0);
 - (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER SWIFT_AVAILABILITY(ios,introduced=2.0,deprecated=26.0,message="Use init(windowScene:) instead.");
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)coder OBJC_DESIGNATED_INITIALIZER;

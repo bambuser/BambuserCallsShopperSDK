@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import UIKit
 import BambuserCallsShopper
 
 struct ProductDetailView: View {
@@ -15,6 +16,7 @@ struct ProductDetailView: View {
 
     @State private var addedToCart = false
     @State private var showSetupAlert = false
+    @State private var showPermissionsAlert = false
 
     private var images: [URL] {
         [product.imageURL] + product.additionalImages
@@ -136,10 +138,19 @@ struct ProductDetailView: View {
             .buttonStyle(.borderedProminent)
 
             Button {
-                if isBambuserConfigured {
-                    bambuserCall.show()
-                } else {
+                guard isBambuserConfigured else {
                     showSetupAlert = true
+                    return
+                }
+                // Request camera + mic upfront so the OS popup lands
+                // on this screen rather than mid-widget-load. Only
+                // proceed to show() if both were granted.
+                Task {
+                    if await MediaPermissions.request() {
+                        bambuserCall.show()
+                    } else {
+                        showPermissionsAlert = true
+                    }
                 }
             } label: {
                 Label("Talk to expert", systemImage: "person.wave.2")
@@ -150,6 +161,16 @@ struct ProductDetailView: View {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text("Set demoOrgId at the top of BambuserCallsShopperDemoApp.swift before starting an expert call.")
+            }
+            .alert("Camera & microphone access needed", isPresented: $showPermissionsAlert) {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Enable camera and microphone in Settings to start a video call.")
             }
         }
         .padding(.top, 4)

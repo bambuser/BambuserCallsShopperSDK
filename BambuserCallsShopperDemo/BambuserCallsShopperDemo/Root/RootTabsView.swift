@@ -11,13 +11,31 @@ struct RootTabsView: View {
     @EnvironmentObject private var cart: CartStore
     @EnvironmentObject private var bambuserCall: BambuserCallController
 
+    // Pin widget + adapter. Created once at RootTabsView init so it
+    // survives recomposition and drives the pin's WebView lifecycle
+    // independently of the call controller. The adapter takes care
+    // of the pin ↔ call handoff (single WebView invariant).
+    // Swap `content` to try each mode:
+    //   .bambuserWidget(...)  — BamHub-configured OLW rendered by
+    //                           the Bambuser widget
+    //   .custom(...)          — SDK-drawn SwiftUI pin, host-provided
+    //                           content
+    @StateObject private var pin = BambuserPinWidget(
+        configuration: BambuserPinWidgetConfiguration(
+            orgId: demoOrgId,
+            environment: demoEnvironment,
+            content: .bambuserWidget(
+                BambuserPinWidgetBambuserOptions(
+                    variantOverride: .video,   // .avatar / .sideDock / .video / nil
+                    popupTimeoutSeconds: 5        // nil → merchant's BamHub default
+                )
+            )
+        )
+    )
+    @State private var adapter: BambuserPinWidgetCallAdapter?
+
     var body: some View {
         ZStack {
-            // While a call is active we hide the tab bar (Products +
-            // Cart) so the shopper stays on whatever page the agent
-            // co-browsed them to — no side-trips out of the flow.
-            // Nav state lives on `NavigationCoordinator`, so the
-            // pushed PDP survives the view swap.
             if bambuserCall.isVisible {
                 switch navigation.currentTab {
                 case .products: ProductsListView()
@@ -31,16 +49,26 @@ struct RootTabsView: View {
 
                     CartView()
                         .tabItem { Label("Cart", systemImage: "cart") }
-//                        .badge(cartBadge)
                         .tag(DemoTab.cart)
                 }
             }
 
+            // Full call widget
             BambuserCallOverlay(controller: bambuserCall)
-        }
-    }
+                .ignoresSafeArea(edges: .bottom)
 
-    private var cartBadge: Int? {
-        cart.totalItems == 0 ? nil : cart.totalItems
+            // Persistent pin widget on top of everything
+            BambuserPinWidgetView(pin: pin)
+        }
+        .onAppear {
+            if adapter == nil {
+                adapter = BambuserPinWidgetCallAdapter(
+                    pin: pin,
+                    call: bambuserCall,
+                    representAfterCallEnds: true
+                )
+            }
+            pin.present()
+        }
     }
 }
