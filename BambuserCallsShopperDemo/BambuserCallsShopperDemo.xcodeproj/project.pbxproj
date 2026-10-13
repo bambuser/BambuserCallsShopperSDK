@@ -339,7 +339,7 @@
 			repositoryURL = "https://github.com/bambuser/BambuserCallsShopperSDK";
 			requirement = {
 				kind = exactVersion;
-				version = "1.4.1";
+				version = "1.4.2";
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

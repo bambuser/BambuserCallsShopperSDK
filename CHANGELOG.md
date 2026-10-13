@@ -16,6 +16,12 @@ the internal CHANGELOG.md and stays on GitLab.
 
 
 
+## [1.4.2] - 2026-10-13
+
+### Added
+
+- The SDK now sends usage metrics to Bambuser when the pin widget is shown and when a video call is opened.
+
 ## [1.4.1] - 2026-10-13
 
 ### Fixed
