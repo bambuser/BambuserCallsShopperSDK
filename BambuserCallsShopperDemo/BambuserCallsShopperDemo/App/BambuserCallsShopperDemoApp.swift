@@ -9,7 +9,7 @@ import BambuserCallsShopper
 // MARK: - Bambuser settings — fill these in before running the demo.
 
 /// Your Bambuser organization id. Get this from your Bambuser dashboard.
-private let demoOrgId = ""
+internal let demoOrgId = ""
 
 /// Which Bambuser region this demo talks to in **release** builds.
 /// Change to `.eu` if your workspace is on the EU cluster.
@@ -19,7 +19,7 @@ private let productionEnvironment: BambuserEnvironment = .us
 /// builds → `productionEnvironment`. `Scripts/prepare-release.sh`
 /// scrubs this `#if DEBUG` block out of the staged copy, so the
 /// public consumer never sees `.stageUS`.
-private var demoEnvironment: BambuserEnvironment {
+internal var demoEnvironment: BambuserEnvironment {
     return productionEnvironment
 }
 
