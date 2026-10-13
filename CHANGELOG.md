@@ -16,6 +16,12 @@ the internal CHANGELOG.md and stays on GitLab.
 
 
 
+## [1.4.1] - 2026-10-13
+
+### Fixed
+
+- SwiftUI demo app compiles again: the demo's org id and environment settings are now visible to the rest of the demo.
+
 ## [1.4.0] - 2026-10-05
 
 ### Added

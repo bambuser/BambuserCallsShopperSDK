@@ -20558,574 +20558,574 @@
   },
   "ConstValues": [
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "Array",
       "offset": 3223,
       "length": 26,
       "value": "[\"always\", \"connect-link\"]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "StringLiteral",
       "offset": 3300,
       "length": 8,
       "value": "\"manual\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "StringLiteral",
       "offset": 3353,
       "length": 7,
       "value": "\"cover\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "IntegerLiteral",
       "offset": 3419,
       "length": 3,
       "value": "180"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "IntegerLiteral",
       "offset": 3432,
       "length": 2,
       "value": "60"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "IntegerLiteral",
       "offset": 3474,
       "length": 2,
       "value": "16"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "IntegerLiteral",
       "offset": 3519,
       "length": 2,
       "value": "49"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "FloatLiteral",
       "offset": 3593,
       "length": 4,
       "value": "0.22"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "BooleanLiteral",
       "offset": 3748,
       "length": 4,
       "value": "true"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "BooleanLiteral",
       "offset": 3808,
       "length": 4,
       "value": "true"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "BooleanLiteral",
       "offset": 4121,
       "length": 4,
       "value": "true"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "BooleanLiteral",
       "offset": 4160,
       "length": 4,
       "value": "true"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "Array",
       "offset": 4305,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "BooleanLiteral",
       "offset": 4452,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "BooleanLiteral",
       "offset": 4617,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "BooleanLiteral",
       "offset": 4698,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "BooleanLiteral",
       "offset": 4824,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "IntegerLiteral",
       "offset": 5936,
       "length": 3,
       "value": "180"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "IntegerLiteral",
       "offset": 5949,
       "length": 3,
       "value": "260"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallConfiguration.swift",
       "kind": "StringLiteral",
       "offset": 6151,
       "length": 136,
       "value": "\"Mozilla\/5.0 (iPhone; CPU iPhone OS 17_7 like Mac OS X) AppleWebKit\/605.1.15 (KHTML, like Gecko) Version\/17.7 Mobile\/21H16 Safari\/604.1\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
       "kind": "BooleanLiteral",
       "offset": 649,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
       "kind": "BooleanLiteral",
       "offset": 708,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
       "kind": "BooleanLiteral",
       "offset": 2626,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
       "kind": "Array",
       "offset": 6682,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
       "kind": "BooleanLiteral",
       "offset": 8685,
       "length": 4,
       "value": "true"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
       "kind": "BooleanLiteral",
       "offset": 9369,
       "length": 4,
       "value": "true"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
       "kind": "Array",
       "offset": 10078,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
       "kind": "IntegerLiteral",
       "offset": 22159,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
       "kind": "Dictionary",
       "offset": 22256,
       "length": 3,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
       "kind": "StringLiteral",
       "offset": 25060,
       "length": 14,
       "value": "\"drop-in-card\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallController.swift",
       "kind": "StringLiteral",
       "offset": 25098,
       "length": 19,
       "value": "\"book-meeting-card\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallHandlers.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallHandlers.swift",
       "kind": "BooleanLiteral",
       "offset": 2943,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallHandlers.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallHandlers.swift",
       "kind": "BooleanLiteral",
       "offset": 2983,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallHandlers.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallHandlers.swift",
       "kind": "BooleanLiteral",
       "offset": 3021,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallHandlers.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallHandlers.swift",
       "kind": "BooleanLiteral",
       "offset": 3060,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserCallHandlers.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserCallHandlers.swift",
       "kind": "BooleanLiteral",
       "offset": 3096,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/UIKit\/BambuserCallViewController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/UIKit\/BambuserCallViewController.swift",
       "kind": "Array",
       "offset": 625,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/UIKit\/BambuserCallViewController.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/UIKit\/BambuserCallViewController.swift",
       "kind": "Array",
       "offset": 683,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/UIKit\/BambuserCallWindowPresenter.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/UIKit\/BambuserCallWindowPresenter.swift",
       "kind": "IntegerLiteral",
       "offset": 766,
       "length": 1,
       "value": "1"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserEnvironment.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserEnvironment.swift",
       "kind": "StringLiteral",
       "offset": 1445,
       "length": 42,
       "value": "\"https:\/\/one-to-one.bambuser.com\/embed.js\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserEnvironment.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserEnvironment.swift",
       "kind": "StringLiteral",
       "offset": 1548,
       "length": 47,
       "value": "\"https:\/\/svc-prod-us.liveshopping.bambuser.com\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserEnvironment.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserEnvironment.swift",
       "kind": "StringLiteral",
       "offset": 1635,
       "length": 47,
       "value": "\"https:\/\/svc-prod-eu.liveshopping.bambuser.com\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserEnvironment.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserEnvironment.swift",
       "kind": "StringLiteral",
       "offset": 1844,
       "length": 45,
       "value": "\"https:\/\/one-to-one.bambuser.com\/eu\/embed.js\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserEnvironment.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserEnvironment.swift",
       "kind": "StringLiteral",
       "offset": 1950,
       "length": 47,
       "value": "\"https:\/\/svc-prod-us.liveshopping.bambuser.com\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserEnvironment.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserEnvironment.swift",
       "kind": "StringLiteral",
       "offset": 2037,
       "length": 47,
       "value": "\"https:\/\/svc-prod-eu.liveshopping.bambuser.com\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserFactorySpec.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserFactorySpec.swift",
       "kind": "Array",
       "offset": 645,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserFactorySpec.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserFactorySpec.swift",
       "kind": "Array",
       "offset": 1256,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserFactorySpec.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserFactorySpec.swift",
       "kind": "Array",
       "offset": 1655,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserFactorySpec.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserFactorySpec.swift",
       "kind": "Array",
       "offset": 1894,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserFactorySpec.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserFactorySpec.swift",
       "kind": "Array",
       "offset": 2191,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserFactorySpec.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserFactorySpec.swift",
       "kind": "Array",
       "offset": 2770,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidget.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidget.swift",
       "kind": "BooleanLiteral",
       "offset": 1820,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidgetCallAdapter.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidgetCallAdapter.swift",
       "kind": "BooleanLiteral",
       "offset": 1460,
       "length": 4,
       "value": "true"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidgetCallAdapter.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidgetCallAdapter.swift",
       "kind": "BooleanLiteral",
       "offset": 2219,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
       "kind": "BooleanLiteral",
       "offset": 4515,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
       "kind": "StringLiteral",
       "offset": 6002,
       "length": 8,
       "value": "\"Avatar\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
       "kind": "StringLiteral",
       "offset": 6031,
       "length": 11,
       "value": "\"Side dock\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
       "kind": "StringLiteral",
       "offset": 6063,
       "length": 7,
       "value": "\"Video\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
       "kind": "IntegerLiteral",
       "offset": 7096,
       "length": 1,
       "value": "5"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
       "kind": "IntegerLiteral",
       "offset": 7206,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
       "kind": "IntegerLiteral",
       "offset": 7218,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
       "kind": "IntegerLiteral",
       "offset": 7229,
       "length": 2,
       "value": "24"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
       "kind": "IntegerLiteral",
       "offset": 7243,
       "length": 2,
       "value": "16"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/BambuserPinWidgetConfiguration.swift",
       "kind": "BooleanLiteral",
       "offset": 7278,
       "length": 4,
       "value": "true"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/UIKit\/BambuserPinWidgetWindowPresenter.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/UIKit\/BambuserPinWidgetWindowPresenter.swift",
       "kind": "IntegerLiteral",
       "offset": 807,
       "length": 1,
       "value": "2"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Internal\/EmbedHTMLBuilder.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Internal\/EmbedHTMLBuilder.swift",
       "kind": "BooleanLiteral",
       "offset": 978,
       "length": 4,
       "value": "true"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Internal\/EmbedHTMLBuilder.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Internal\/EmbedHTMLBuilder.swift",
       "kind": "BooleanLiteral",
       "offset": 1535,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Tracking\/Environment.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Tracking\/Environment.swift",
       "kind": "StringLiteral",
       "offset": 447,
       "length": 7,
-      "value": "\"1.4.0\""
+      "value": "\"1.4.1\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Internal\/NativePinBody.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Internal\/NativePinBody.swift",
       "kind": "BooleanLiteral",
       "offset": 507,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Tracking\/NetworkManager.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Tracking\/NetworkManager.swift",
       "kind": "StringLiteral",
       "offset": 713,
       "length": 6,
       "value": "\"POST\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Internal\/PinWidgetStateMachine.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Internal\/PinWidgetStateMachine.swift",
       "kind": "BooleanLiteral",
       "offset": 966,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Internal\/PinWidgetStateMachine.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Internal\/PinWidgetStateMachine.swift",
       "kind": "IntegerLiteral",
       "offset": 4807,
       "length": 3,
       "value": "100"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Internal\/PinWidgetWebViewHost.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Internal\/PinWidgetWebViewHost.swift",
       "kind": "Array",
       "offset": 1256,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Internal\/PinWidgetWebViewHost.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Internal\/PinWidgetWebViewHost.swift",
       "kind": "Array",
       "offset": 1321,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Internal\/PinWidgetWebViewHost.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Internal\/PinWidgetWebViewHost.swift",
       "kind": "IntegerLiteral",
       "offset": 1523,
       "length": 1,
       "value": "8"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Tracking\/StorageManager.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Tracking\/StorageManager.swift",
       "kind": "StringLiteral",
       "offset": 471,
       "length": 36,
       "value": "\"com.bambuser.callsshopper.tracking\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Tracking\/TrackingDataModel.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Tracking\/TrackingDataModel.swift",
       "kind": "StringLiteral",
       "offset": 758,
       "length": 13,
       "value": "\"USER_ID_KEY\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Tracking\/TrackingProvider.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Tracking\/TrackingProvider.swift",
       "kind": "Dictionary",
       "offset": 6793,
       "length": 3,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Tracking\/TrackingProviderRegistry.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Tracking\/TrackingProviderRegistry.swift",
       "kind": "Dictionary",
       "offset": 1277,
       "length": 3,
       "value": "[]"
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Tracking\/WebViewCookieInjector.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Tracking\/WebViewCookieInjector.swift",
       "kind": "StringLiteral",
       "offset": 656,
       "length": 13,
       "value": "\"_bamls_usid\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Tracking\/WebViewCookieInjector.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Tracking\/WebViewCookieInjector.swift",
       "kind": "StringLiteral",
       "offset": 718,
       "length": 13,
       "value": "\"_bamls_lcte\""
     },
     {
-      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.0\/Sources\/BambuserCallsShopper\/Tracking\/WebViewCookieInjector.swift",
+      "filePath": "\/var\/folders\/yg\/lnk3_ntd1hd77qzf2gkd8_s80000gp\/T\/mira-shopper-gl-1.4.1\/Sources\/BambuserCallsShopper\/Tracking\/WebViewCookieInjector.swift",
       "kind": "StringLiteral",
       "offset": 783,
       "length": 9,
